@@ -101,7 +101,7 @@ export class SerpApiClient {
     if (!params.engine) {
       throw new Error('Engine parameter is required (google, bing, duckduckgo, or brave)');
     }
-    requestParams.engines = [params.engine];
+    requestParams.engine = params.engine;
 
     return this.makeRequest('/api/search', requestParams);
   }

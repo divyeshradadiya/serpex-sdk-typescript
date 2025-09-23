@@ -1,6 +1,6 @@
 {
   "name": "@serpex/sdk",
-  "version": "1.0.3", 
+  "version": "1.0.4", 
   "description": "Official TypeScript SDK for Serpex SERP API - Fetch search results in JSON format",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
