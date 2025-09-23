@@ -85,14 +85,6 @@ const results = await client.search({
 });
 ```
 
-##### `updateApiKey(apiKey: string): void`
-
-Update the API key.
-
-##### `updateBaseUrl(baseUrl: string): void`
-
-Update the base URL.
-
 ## Search Parameters
 
 The `SearchParams` interface supports all search parameters:

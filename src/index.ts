@@ -105,24 +105,4 @@ export class SerpApiClient {
 
     return this.makeRequest('/api/search', requestParams);
   }
-
-  /**
-   * Update the API key
-   */
-  updateApiKey(apiKey: string): void {
-    if (!apiKey || typeof apiKey !== 'string') {
-      throw new Error('API key must be a non-empty string');
-    }
-    this.apiKey = apiKey;
-  }
-
-  /**
-   * Update the base URL
-   */
-  updateBaseUrl(baseUrl: string): void {
-    if (!baseUrl || typeof baseUrl !== 'string') {
-      throw new Error('Base URL must be a non-empty string');
-    }
-    this.baseUrl = baseUrl.replace(/\/$/, '');
-  }
 }
