@@ -1,0 +1,56 @@
+{
+  "name": "@serpex/sdk",
+  "version": "1.0.0",
+  "description": "Official TypeScript SDK for Serpex SERP API - Fetch search results in JSON format",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts"
+  },
+  "keywords": [
+    "serp",
+    "search",
+    "api",
+    "google",
+    "search-results",
+    "seo",
+    "typescript",
+    "sdk"
+  ],
+  "author": "Serpex Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/divyeshradadiya/serp-frontend.git",
+    "directory": "sdk/typescript"
+  },
+  "bugs": {
+    "url": "https://github.com/divyeshradadiya/serp-frontend/issues"
+  },
+  "homepage": "https://github.com/divyeshradadiya/serp-frontend#readme",
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.5.0",
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
