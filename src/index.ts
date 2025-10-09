@@ -6,12 +6,12 @@ import {
 
 export { SearchResponse, SearchParams, SerpApiException };
 
-export class SerpApiClient {
+export class SerpexClient {
   private baseUrl: string;
   private apiKey: string;
 
   /**
-   * Create a new SerpApiClient instance
+   * Create a new SerpexClient instance
    * @param apiKey - Your API key from the Serpex dashboard
    * @param baseUrl - Base URL for the API (optional, defaults to production)
    */

@@ -15,10 +15,10 @@ pnpm add serpex
 ## Quick Start
 
 ```typescript
-import { SerpApiClient } from 'serpex';
+import { SerpexClient } from 'serpex';
 
 // Initialize the client with your API key
-const client = new SerpApiClient('your-api-key-here');
+const client = new SerpexClient('your-api-key-here');
 
 // Search with Google
 const googleResults = await client.search({
@@ -40,12 +40,12 @@ console.log(bingResults.results[0].title);
 
 ## API Reference
 
-### SerpApiClient
+### SerpexClient
 
 #### Constructor
 
 ```typescript
-new SerpApiClient(apiKey: string, baseUrl?: string)
+new SerpexClient(apiKey: string, baseUrl?: string)
 ```
 
 - `apiKey`: Your API key from the Serpex dashboard
@@ -163,7 +163,7 @@ interface SearchResponse {
 The SDK throws `SerpApiException` for API errors:
 
 ```typescript
-import { SerpApiClient, SerpApiException } from 'serpex';
+import { SerpexClient, SerpApiException } from 'serpex';
 
 try {
   const results = await client.search({ q: 'test query' });

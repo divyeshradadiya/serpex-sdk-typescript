@@ -1,10 +1,10 @@
 import { SearchResponse, SearchParams, SerpApiException } from './types';
 export { SearchResponse, SearchParams, SerpApiException };
-export declare class SerpApiClient {
+export declare class SerpexClient {
     private baseUrl;
     private apiKey;
     /**
-     * Create a new SerpApiClient instance
+     * Create a new SerpexClient instance
      * @param apiKey - Your API key from the Serpex dashboard
      * @param baseUrl - Base URL for the API (optional, defaults to production)
      */

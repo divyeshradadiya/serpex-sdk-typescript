@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SerpApiClient = exports.SerpApiException = void 0;
+exports.SerpexClient = exports.SerpApiException = void 0;
 const types_1 = require("./types");
 Object.defineProperty(exports, "SerpApiException", { enumerable: true, get: function () { return types_1.SerpApiException; } });
-class SerpApiClient {
+class SerpexClient {
     /**
-     * Create a new SerpApiClient instance
+     * Create a new SerpexClient instance
      * @param apiKey - Your API key from the Serpex dashboard
      * @param baseUrl - Base URL for the API (optional, defaults to production)
      */
@@ -83,5 +83,5 @@ class SerpApiClient {
         return this.makeRequest('/api/search', requestParams);
     }
 }
-exports.SerpApiClient = SerpApiClient;
+exports.SerpexClient = SerpexClient;
 //# sourceMappingURL=index.js.map
