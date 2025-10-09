@@ -1,21 +1,21 @@
-# @serpex/sdk
+# serpex
 
 Official TypeScript SDK for the Serpex SERP API - Fetch search results in JSON format.
 
 ## Installation
 
 ```bash
-npm install @serpex/sdk
+npm install serpex
 # or
-yarn add @serpex/sdk
+yarn add serpex
 # or
-pnpm add @serpex/sdk
+pnpm add serpex
 ```
 
 ## Quick Start
 
 ```typescript
-import { SerpApiClient } from '@serpex/sdk';
+import { SerpApiClient } from 'serpex';
 
 // Initialize the client with your API key
 const client = new SerpApiClient('your-api-key-here');
@@ -163,7 +163,7 @@ interface SearchResponse {
 The SDK throws `SerpApiException` for API errors:
 
 ```typescript
-import { SerpApiClient, SerpApiException } from '@serpex/sdk';
+import { SerpApiClient, SerpApiException } from 'serpex';
 
 try {
   const results = await client.search({ q: 'test query' });
