@@ -61,8 +61,7 @@ Search using the SERP API with flexible parameters. Engine parameter is required
 const results = await client.search({
   q: 'javascript frameworks',
   engine: 'duckduckgo',
-  region: 'us-en',
-  safesearch: 1
+  region: 'us-en'
 });
 ```
 
@@ -74,7 +73,6 @@ const results = await client.search({
   engines: ['google', 'duckduckgo'],
   language: 'en',
   country: 'us',
-  safesearch: 1,
   time_range: 'year',
   pageno: 1,
   // Google-specific parameters
@@ -103,7 +101,6 @@ interface SearchParams {
   pageno?: number;
   page?: number;
   time_range?: string;
-  safesearch?: number;
 
   // Google specific
   hl?: string;  // language
@@ -121,9 +118,6 @@ interface SearchParams {
   spellcheck?: boolean;
   ui_lang?: string;
   country?: string;
-
-  // Legacy support
-  maxResults?: number;
 }
 ```
 

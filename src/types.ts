@@ -45,7 +45,6 @@ export interface SearchParams {
   pageno?: number;
   page?: number;
   time_range?: string;
-  safesearch?: number;
 
   // Google specific
   hl?: string;  // language
@@ -63,9 +62,6 @@ export interface SearchParams {
   spellcheck?: boolean;
   ui_lang?: string;
   country?: string;
-
-  // Legacy support
-  maxResults?: number;
 }
 
 export interface SerpApiError {

@@ -34,7 +34,6 @@ export interface SearchParams {
     pageno?: number;
     page?: number;
     time_range?: string;
-    safesearch?: number;
     hl?: string;
     lr?: string;
     cr?: string;
@@ -44,7 +43,6 @@ export interface SearchParams {
     spellcheck?: boolean;
     ui_lang?: string;
     country?: string;
-    maxResults?: number;
 }
 export interface SerpApiError {
     error: string;
