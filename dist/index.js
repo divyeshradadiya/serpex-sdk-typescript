@@ -57,29 +57,27 @@ class SerpexClient {
     }
     /**
      * Search using the SERP API
-     * @param params - Search parameters including query, engine, and engine-specific options
+     * @param params - Search parameters including query, engine, category, time_range
      * @returns Search results
      */
     async search(params) {
-        if (!params.q && !params.query) {
-            throw new Error('Query parameter (q or query) is required');
+        if (!params.q) {
+            throw new Error('Query parameter (q) is required');
         }
-        const searchQuery = params.q || params.query;
-        if (typeof searchQuery !== 'string' || searchQuery.trim().length === 0) {
+        if (typeof params.q !== 'string' || params.q.trim().length === 0) {
             throw new Error('Query must be a non-empty string');
         }
-        if (searchQuery.length > 500) {
+        if (params.q.length > 500) {
             throw new Error('Query too long (max 500 characters)');
         }
-        // Prepare request parameters
-        const requestParams = { ...params };
-        // Ensure we have a query parameter
-        requestParams.q = searchQuery;
-        // Handle engine parameter - must be specified
-        if (!params.engine) {
-            throw new Error('Engine parameter is required (google, bing, duckduckgo, or brave)');
-        }
-        requestParams.engine = params.engine;
+        // Prepare request parameters with only supported params
+        const requestParams = {
+            q: params.q,
+            engine: params.engine || 'google', // Default to google
+            category: params.category || 'general',
+            time_range: params.time_range || 'all',
+            format: params.format || 'json'
+        };
         return this.makeRequest('/api/search', requestParams);
     }
 }

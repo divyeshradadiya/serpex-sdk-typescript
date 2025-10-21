@@ -27,22 +27,11 @@ export interface SearchResponse {
     suggestions: string[];
 }
 export interface SearchParams {
-    q?: string;
-    query?: string;
-    engine?: string;
-    language?: string;
-    pageno?: number;
-    page?: number;
-    time_range?: string;
-    hl?: string;
-    lr?: string;
-    cr?: string;
-    mkt?: string;
-    region?: string;
-    category?: string;
-    spellcheck?: boolean;
-    ui_lang?: string;
-    country?: string;
+    q: string;
+    engine?: 'google' | 'bing' | 'duckduckgo' | 'brave' | 'auto';
+    category?: 'web' | 'images' | 'videos' | 'news' | 'scholar' | 'general';
+    time_range?: 'all' | 'day' | 'week' | 'month' | 'year';
+    format?: 'json' | 'csv' | 'rss';
 }
 export interface SerpApiError {
     error: string;

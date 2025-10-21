@@ -33,35 +33,20 @@ export interface SearchResponse {
 }
 
 export interface SearchParams {
-  // Required: query (use either q or query)
-  q?: string;
-  query?: string;
+  // Required: search query
+  q: string;
 
-  // Engine selection (only one engine allowed)
-  engine?: string;
+  // Optional: Engine selection (defaults to 'google')
+  engine?: 'google' | 'bing' | 'duckduckgo' | 'brave' | 'auto';
 
-  // Common parameters
-  language?: string;
-  pageno?: number;
-  page?: number;
-  time_range?: string;
+  // Optional: Search category
+  category?: 'web' | 'images' | 'videos' | 'news' | 'scholar' | 'general';
 
-  // Google specific
-  hl?: string;  // language
-  lr?: string;  // language restrict
-  cr?: string;  // country restrict
+  // Optional: Time range filter
+  time_range?: 'all' | 'day' | 'week' | 'month' | 'year';
 
-  // Bing specific
-  mkt?: string; // market
-
-  // DuckDuckGo specific
-  region?: string;
-
-  // Brave specific
-  category?: string;
-  spellcheck?: boolean;
-  ui_lang?: string;
-  country?: string;
+  // Optional: Response format
+  format?: 'json' | 'csv' | 'rss';
 }
 
 export interface SerpApiError {
