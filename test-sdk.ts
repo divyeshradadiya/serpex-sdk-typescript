@@ -5,7 +5,7 @@
 
 import { SerpexClient } from './src/index';
 
-const API_KEY = 'sk_50d69d9ba447b7425cfdc6084ef60bafa169e3d1db68c5285f2b8f724d683fa0';
+const API_KEY = 'sk_test_dummy_api_key_for_testing_only';
 // Test against local backend - make sure backend is running on port 3002
 const BASE_URL = 'http://localhost:3002';
 
