@@ -36,11 +36,11 @@ export interface SearchParams {
   // Required: search query
   q: string;
 
-  // Optional: Engine selection (defaults to 'google')
-  engine?: 'google' | 'bing' | 'duckduckgo' | 'brave' | 'auto';
+  // Optional: Engine selection (defaults to 'auto')
+  engine?: 'auto' | 'google' | 'bing' | 'duckduckgo' | 'brave' | 'yahoo' | 'yandex';
 
-  // Optional: Search category
-  category?: 'web' | 'images' | 'videos' | 'news' | 'scholar' | 'general';
+  // Optional: Search category (currently only 'web' supported)
+  category?: 'web';
 
   // Optional: Time range filter
   time_range?: 'all' | 'day' | 'week' | 'month' | 'year';

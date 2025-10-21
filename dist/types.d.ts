@@ -28,8 +28,8 @@ export interface SearchResponse {
 }
 export interface SearchParams {
     q: string;
-    engine?: 'google' | 'bing' | 'duckduckgo' | 'brave' | 'auto';
-    category?: 'web' | 'images' | 'videos' | 'news' | 'scholar' | 'general';
+    engine?: 'auto' | 'google' | 'bing' | 'duckduckgo' | 'brave' | 'yahoo' | 'yandex';
+    category?: 'web';
     time_range?: 'all' | 'day' | 'week' | 'month' | 'year';
     format?: 'json' | 'csv' | 'rss';
 }

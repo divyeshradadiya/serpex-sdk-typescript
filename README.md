@@ -20,22 +20,20 @@ import { SerpexClient } from 'serpex';
 // Initialize the client with your API key
 const client = new SerpexClient('your-api-key-here');
 
-// Search with Google
+// Search with auto-routing (recommended)
+const results = await client.search({
+  q: 'typescript tutorial',
+  engine: 'auto'
+});
+
+// Search with specific engine
 const googleResults = await client.search({
   q: 'typescript tutorial',
-  engine: 'google',
-  hl: 'en'
+  engine: 'google'
 });
 
-// Search with Bing
-const bingResults = await client.search({
-  q: 'typescript tutorial',
-  engine: 'bing',
-  mkt: 'en-US'
-});
-
+console.log(results.results[0].title);
 console.log(googleResults.results[0].title);
-console.log(bingResults.results[0].title);
 ```
 
 ## API Reference
@@ -55,31 +53,14 @@ new SerpexClient(apiKey: string, baseUrl?: string)
 
 ##### `search(params: SearchParams): Promise<SearchResponse>`
 
-Search using the SERP API with flexible parameters. Engine parameter is required.
-
-```typescript
-const results = await client.search({
-  q: 'javascript frameworks',
-  engine: 'duckduckgo',
-  region: 'us-en'
-});
-```
-
 Search using the SERP API with flexible parameters.
 
 ```typescript
 const results = await client.search({
   q: 'javascript frameworks',
-  engines: ['google', 'duckduckgo'],
-  language: 'en',
-  country: 'us',
-  time_range: 'year',
-  pageno: 1,
-  // Google-specific parameters
-  hl: 'en',
-  lr: 'lang_en',
-  // Bing-specific parameters
-  mkt: 'en-US'
+  engine: 'auto',
+  category: 'web',
+  time_range: 'week'
 });
 ```
 
@@ -89,37 +70,32 @@ The `SearchParams` interface supports all search parameters:
 
 ```typescript
 interface SearchParams {
-  // Required: query (use either q or query)
-  q?: string;
-  query?: string;
+  // Required: search query
+  q: string;
 
-  // Engine selection (only one engine allowed)
-  engine?: string;
+  // Optional: Engine selection (defaults to 'auto')
+  engine?: 'auto' | 'google' | 'bing' | 'duckduckgo' | 'brave' | 'yahoo' | 'yandex';
 
-  // Common parameters
-  language?: string;
-  pageno?: number;
-  page?: number;
-  time_range?: string;
+  // Optional: Search category (currently only 'web' supported)
+  category?: 'web';
 
-  // Google specific
-  hl?: string;  // language
-  lr?: string;  // language restrict
-  cr?: string;  // country restrict
+  // Optional: Time range filter
+  time_range?: 'all' | 'day' | 'week' | 'month' | 'year';
 
-  // Bing specific
-  mkt?: string; // market
-
-  // DuckDuckGo specific
-  region?: string;
-
-  // Brave specific
-  category?: string;
-  spellcheck?: boolean;
-  ui_lang?: string;
-  country?: string;
+  // Optional: Response format
+  format?: 'json' | 'csv' | 'rss';
 }
 ```
+
+## Supported Engines
+
+- **auto**: Automatically routes to the best available search engine
+- **google**: Google's primary search engine
+- **bing**: Microsoft's search engine
+- **duckduckgo**: Privacy-focused search engine
+- **brave**: Privacy-first search engine
+- **yahoo**: Yahoo search engine
+- **yandex**: Russian search engine
 
 ## Response Format
 
@@ -170,6 +146,45 @@ try {
 }
 ```
 
+## Examples
+
+### Basic Search
+```typescript
+const results = await client.search({
+  q: 'coffee shops near me'
+});
+```
+
+### Advanced Search with Filters
+```typescript
+const results = await client.search({
+  q: 'latest AI news',
+  engine: 'google',
+  time_range: 'day',
+  category: 'web'
+});
+```
+
+### Using Different Engines
+```typescript
+// Auto-routing (recommended)
+const autoResults = await client.search({
+  q: 'typescript',
+  engine: 'auto'
+});
+
+// Specific engine
+const googleResults = await client.search({
+  q: 'typescript',
+  engine: 'google'
+});
+
+// Privacy-focused search
+const ddgResults = await client.search({
+  q: 'typescript',
+  engine: 'duckduckgo'
+});
+```
 
 ## License
 

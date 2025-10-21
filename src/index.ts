@@ -93,8 +93,8 @@ export class SerpexClient {
     // Prepare request parameters with only supported params
     const requestParams: Record<string, any> = {
       q: params.q,
-      engine: params.engine || 'google', // Default to google
-      category: params.category || 'general',
+      engine: params.engine || 'auto', // Default to auto
+      category: params.category || 'web',
       time_range: params.time_range || 'all',
       format: params.format || 'json'
     };
