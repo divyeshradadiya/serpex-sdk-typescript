@@ -51,17 +51,59 @@ new SerpexClient(apiKey: string, baseUrl?: string)
 
 #### Methods
 
-##### `search(params: SearchParams): Promise<SearchResponse>`
+##### `extract(params: ExtractParams): Promise<ExtractResponse>`
 
-Search using the SERP API with flexible parameters.
+Extract content from web pages and convert them to LLM-ready markdown data. Accepts up to 10 URLs per request.
 
 ```typescript
-const results = await client.search({
-  q: 'javascript frameworks',
-  engine: 'auto',
-  category: 'web',
-  time_range: 'week'
+const results = await client.extract({
+  urls: [
+    'https://example.com',
+    'https://httpbin.org'
+  ]
 });
+```
+
+## Extract Parameters
+
+The `ExtractParams` interface supports extraction parameters:
+
+```typescript
+interface ExtractParams {
+  // Required: URLs to extract (max 10)
+  urls: string[];
+}
+```
+
+## Extract Response Format
+
+```typescript
+interface ExtractResponse {
+  success: boolean;
+  results: ExtractResult[];
+  metadata: ExtractMetadata;
+}
+
+interface ExtractResult {
+  url: string;
+  success: boolean;
+  markdown?: string;
+  error?: string;
+  error_type?: string;
+  status_code?: number;
+  crawled_at?: string;
+  extraction_mode?: string;
+}
+
+interface ExtractMetadata {
+  total_urls: number;
+  processed_urls: number;
+  successful_crawls: number;
+  failed_crawls: number;
+  credits_used: number;
+  response_time: number;
+  timestamp: string;
+}
 ```
 
 ## Search Parameters
@@ -165,25 +207,68 @@ const results = await client.search({
 });
 ```
 
-### Using Different Engines
+### Extract Web Content to LLM-Ready Data
+
+#### Extract from a Single URL
 ```typescript
-// Auto-routing (recommended)
-const autoResults = await client.search({
-  q: 'typescript',
-  engine: 'auto'
+// Extract content from one website
+const result = await client.extract({
+  urls: ['https://example.com']
 });
 
-// Specific engine
-const googleResults = await client.search({
-  q: 'typescript',
-  engine: 'google'
+if (result.results[0].success) {
+  console.log(`✅ Extracted ${result.results[0].markdown?.length} characters`);
+  console.log('Markdown content:', result.results[0].markdown?.substring(0, 200) + '...');
+}
+```
+
+#### Extract from Multiple URLs (up to 10 at once)
+```typescript
+// Extract content from multiple websites (up to 10 URLs)
+const extractResults = await client.extract({
+  urls: [
+    'https://example.com',
+    'https://httpbin.org',
+    'https://github.com'
+  ]
 });
 
-// Privacy-focused search
-const ddgResults = await client.search({
-  q: 'typescript',
-  engine: 'duckduckgo'
+console.log(`Successfully extracted ${extractResults.metadata.successful_crawls} pages`);
+console.log(`Total credits used: ${extractResults.metadata.credits_used}`);
+
+extractResults.results.forEach(result => {
+  if (result.success) {
+    console.log(`✅ ${result.url}: ${result.markdown?.length} characters`);
+    // Use result.markdown for LLM processing
+  } else {
+    console.log(`❌ ${result.url}: ${result.error}`);
+  }
 });
+```
+
+#### Sample Response
+```typescript
+// Example response structure
+{
+  success: true,
+  results: [
+    {
+      url: 'https://example.com',
+      success: true,
+      markdown: '# Example Domain\n\nThis domain is for use in...',
+      status_code: 200
+    }
+  ],
+  metadata: {
+    total_urls: 1,
+    processed_urls: 1,
+    successful_crawls: 1,
+    failed_crawls: 0,
+    credits_used: 3,
+    response_time: 255,
+    timestamp: '2025-11-13T10:30:00.000Z'
+  }
+}
 ```
 
 ## License
