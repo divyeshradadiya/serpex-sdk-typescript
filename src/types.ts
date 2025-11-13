@@ -32,6 +32,38 @@ export interface SearchResponse {
   suggestions: string[];
 }
 
+export interface ExtractResult {
+  url: string;
+  success: boolean;
+  markdown?: string;
+  error?: string;
+  error_type?: string;
+  status_code?: number;
+  crawled_at?: string;
+  extraction_mode?: string;
+}
+
+export interface ExtractMetadata {
+  total_urls: number;
+  processed_urls: number;
+  successful_crawls: number;
+  failed_crawls: number;
+  credits_used: number;
+  response_time: number;
+  timestamp: string;
+}
+
+export interface ExtractResponse {
+  success: boolean;
+  results: ExtractResult[];
+  metadata: ExtractMetadata;
+}
+
+export interface ExtractParams {
+  // Required: URLs to extract (max 10)
+  urls: string[];
+}
+
 export interface SearchParams {
   // Required: search query
   q: string;

@@ -1,7 +1,7 @@
 {
   "name": "serpex",
-  "version": "2.2.0",
-  "description": "Official TypeScript SDK for Serpex SERP API - Fetch search results in JSON format",
+  "version": "2.3.0",
+  "description": "Official TypeScript SDK for Serpex search API - Fetch search results in JSON format",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -32,13 +32,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/divyeshradadiya/serp-frontend.git",
+    "url": "https://github.com/divyeshradadiya/serpex-sdk-typescript",
     "directory": "sdk/typescript"
   },
   "bugs": {
-    "url": "https://github.com/divyeshradadiya/serp-frontend/issues"
+    "url": "https://github.com/divyeshradadiya/serpex-sdk-typescript/issues"
   },
-  "homepage": "https://github.com/divyeshradadiya/serp-frontend#readme",
+  "homepage": "https://github.com/divyeshradadiya/serpex-sdk-typescript#readme",
   "files": [
     "dist",
     "README.md",
@@ -46,7 +46,7 @@
   ],
   "devDependencies": {
     "@types/jest": "^29.5.0",
-    "@types/node": "^20.0.0",
+    "@types/node": "^20.19.25",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.0.0",

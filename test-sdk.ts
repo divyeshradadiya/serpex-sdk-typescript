@@ -6,11 +6,11 @@
 import { SerpexClient } from './src/index';
 
 const API_KEY = 'sk_test_dummy_api_key_for_testing_only';
-// Test against local backend - make sure backend is running on port 3002
-const BASE_URL = 'http://localhost:3002';
+// Test against production API
+const BASE_URL = 'https://api.serpex.dev';
 
 async function testSearch() {
-  console.log('🧪 Testing TypeScript SDK v2.1.0');
+  console.log('🧪 Testing TypeScript SDK v2.2.0');
   console.log(`   Base URL: ${BASE_URL}`);
   console.log(`   API Key: ${API_KEY.substring(0, 20)}...\n`);
   
@@ -25,7 +25,7 @@ async function testSearch() {
     console.log('✅ Test 1 passed');
     console.log(`   Query: ${result1.query}`);
     console.log(`   Results: ${result1.results.length}`);
-    console.log(`   Credits used: ${result1.metadata.credits_used}`);
+    console.log(`   Credits used: ${result1.metadata  .credits_used}`);
     console.log(`   Response time: ${result1.metadata.response_time}ms\n`);
 
     // Small delay to avoid rate limiting
@@ -51,16 +51,30 @@ async function testSearch() {
     const result3 = await client.search({
       q: 'web development',
       engine: 'google',
-      category: 'general',
+      category: 'web',
     });
     console.log('✅ Test 3 passed');
     console.log(`   Query: ${result3.query}`);
     console.log(`   Results: ${result3.results.length}\n`);
 
+    // Test 4: Extract content from URLs
+    console.log('Test 4: Extract content from web pages');
+    const result4 = await client.extract({
+      urls: [
+        'https://example.com',
+        'https://httpbin.org'
+      ]
+    });
+    console.log('✅ Test 4 passed');
+    console.log(`   Success: ${result4.success}`);
+    console.log(`   Total URLs: ${result4.metadata.total_urls}`);
+    console.log(`   Successful crawls: ${result4.metadata.successful_crawls}`);
+    console.log(`   Credits used: ${result4.metadata.credits_used}\n`);
+
     console.log('🎉 All tests passed successfully!');
     console.log('\n📊 Summary:');
-    console.log(`   Total tests: 3`);
-    console.log(`   Passed: 3`);
+    console.log(`   Total tests: 4`);
+    console.log(`   Passed: 4`);
     console.log(`   Failed: 0`);
 
   } catch (error) {

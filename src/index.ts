@@ -1,10 +1,12 @@
 import {
   SearchResponse,
   SearchParams,
+  ExtractResponse,
+  ExtractParams,
   SerpApiException
 } from './types';
 
-export { SearchResponse, SearchParams, SerpApiException };
+export { SearchResponse, SearchParams, ExtractResponse, ExtractParams, SerpApiException };
 
 export class SerpexClient {
   private baseUrl: string;
@@ -27,30 +29,41 @@ export class SerpexClient {
   /**
    * Make an authenticated request to the API
    */
-  private async makeRequest(endpoint: string, params: Record<string, any> = {}): Promise<any> {
+  private async makeRequest(endpoint: string, params: Record<string, any> = {}, method: string = 'GET'): Promise<any> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers: Record<string, string> = {
       'Authorization': `Bearer ${this.apiKey}`,
       'Content-Type': 'application/json'
     };
 
-    // Build query string from params
-    const searchParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        if (Array.isArray(value)) {
-          value.forEach(v => searchParams.append(key, v.toString()));
-        } else {
-          searchParams.append(key, value.toString());
-        }
-      }
-    });
+    let finalUrl = url;
+    let body: string | undefined;
 
-    const finalUrl = searchParams.toString() ? `${url}?${searchParams.toString()}` : url;
+    if (method === 'POST') {
+      // For POST requests, send params as JSON body
+      body = JSON.stringify(params);
+    } else {
+      // For GET requests, send params as query parameters
+      const searchParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (Array.isArray(value)) {
+            value.forEach(v => searchParams.append(key, v.toString()));
+          } else {
+            searchParams.append(key, value.toString());
+          }
+        }
+      });
+
+      if (searchParams.toString()) {
+        finalUrl = `${url}?${searchParams.toString()}`;
+      }
+    }
 
     const response = await fetch(finalUrl, {
-      method: 'GET',
-      headers
+      method,
+      headers,
+      body
     });
 
     if (!response.ok) {
@@ -100,5 +113,41 @@ export class SerpexClient {
     };
 
     return this.makeRequest('/api/search', requestParams);
+  }
+
+  /**
+   * Extract content from web pages
+   * @param params - Extraction parameters including URLs to scrape
+   * @returns Extraction results
+   */
+  async extract(params: ExtractParams): Promise<ExtractResponse> {
+    if (!params.urls || !Array.isArray(params.urls) || params.urls.length === 0) {
+      throw new Error('URLs array is required and must contain at least one URL');
+    }
+
+    if (params.urls.length > 10) {
+      throw new Error('Maximum 10 URLs allowed per request');
+    }
+
+    // Validate URLs
+    const invalidUrls = params.urls.filter(url => {
+      try {
+        new URL(url);
+        return false;
+      } catch {
+        return true;
+      }
+    });
+
+    if (invalidUrls.length > 0) {
+      throw new Error(`Invalid URLs provided: ${invalidUrls.join(', ')}`);
+    }
+
+    // Prepare request parameters
+    const requestParams: Record<string, any> = {
+      urls: params.urls
+    };
+
+    return this.makeRequest('/api/crawl', requestParams, 'POST');
   }
 }
