@@ -1,5 +1,5 @@
-import { SearchResponse, SearchParams, SerpApiException } from './types';
-export { SearchResponse, SearchParams, SerpApiException };
+import { SearchResponse, SearchParams, ExtractResponse, ExtractParams, SerpApiException } from "./types";
+export { SearchResponse, SearchParams, ExtractResponse, ExtractParams, SerpApiException, };
 export declare class SerpexClient {
     private baseUrl;
     private apiKey;
@@ -19,5 +19,11 @@ export declare class SerpexClient {
      * @returns Search results
      */
     search(params: SearchParams): Promise<SearchResponse>;
+    /**
+     * Extract content from web pages
+     * @param params - Extraction parameters including URLs to scrape
+     * @returns Extraction results
+     */
+    extract(params: ExtractParams): Promise<ExtractResponse>;
 }
 //# sourceMappingURL=index.d.ts.map

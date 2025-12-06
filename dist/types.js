@@ -6,7 +6,7 @@ exports.SerpApiException = void 0;
 class SerpApiException extends Error {
     constructor(message, statusCode, details) {
         super(message);
-        this.name = 'SerpApiException';
+        this.name = "SerpApiException";
         this.statusCode = statusCode;
         this.details = details;
     }

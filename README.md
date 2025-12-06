@@ -15,21 +15,21 @@ pnpm add serpex
 ## Quick Start
 
 ```typescript
-import { SerpexClient } from 'serpex';
+import { SerpexClient } from "serpex";
 
 // Initialize the client with your API key
-const client = new SerpexClient('your-api-key-here');
+const client = new SerpexClient("your-api-key-here");
 
 // Search with auto-routing (recommended)
 const results = await client.search({
-  q: 'typescript tutorial',
-  engine: 'auto'
+  q: "typescript tutorial",
+  engine: "auto",
 });
 
 // Search with specific engine
 const googleResults = await client.search({
-  q: 'typescript tutorial',
-  engine: 'google'
+  q: "typescript tutorial",
+  engine: "google",
 });
 
 console.log(results.results[0].title);
@@ -57,10 +57,7 @@ Extract content from web pages and convert them to LLM-ready markdown data. Acce
 
 ```typescript
 const results = await client.extract({
-  urls: [
-    'https://example.com',
-    'https://httpbin.org'
-  ]
+  urls: ["https://example.com", "https://httpbin.org"],
 });
 ```
 
@@ -116,17 +113,52 @@ interface SearchParams {
   q: string;
 
   // Optional: Engine selection (defaults to 'auto')
-  engine?: 'auto' | 'google' | 'bing' | 'duckduckgo' | 'brave' | 'yahoo' | 'yandex';
+  engine?:
+    | "auto"
+    | "google"
+    | "bing"
+    | "duckduckgo"
+    | "brave"
+    | "yahoo"
+    | "yandex";
 
-  // Optional: Search category (currently only 'web' supported)
-  category?: 'web';
+  // Optional: Search category ('web' for general search, 'news' for news articles - always returns latest news)
+  category?: "web" | "news";
 
-  // Optional: Time range filter
-  time_range?: 'all' | 'day' | 'week' | 'month' | 'year';
+  // Optional: Time range filter (only applicable for 'web' category, ignored for 'news')
+  time_range?: "all" | "day" | "week" | "month" | "year";
 
   // Optional: Response format
-  format?: 'json' | 'csv' | 'rss';
+  format?: "json" | "csv" | "rss";
 }
+```
+
+### News Search Example
+
+News search always returns the latest news articles. The `time_range` parameter is ignored for news searches.
+
+```typescript
+// Search for latest news articles
+const newsResults = await client.search({
+  q: "artificial intelligence",
+  engine: "google",
+  category: "news", // Always returns latest news
+});
+
+console.log(newsResults.results[0].title);
+console.log(newsResults.results[0].published_date);
+```
+
+q: "artificial intelligence",
+engine: "google",
+category: "news",
+});
+
+console.log(newsResults.results[0].title);
+console.log(newsResults.results[0].published_date);
+
+```
+
 ```
 
 ## Supported Engines
@@ -175,15 +207,15 @@ interface SearchResponse {
 The SDK throws `SerpApiException` for API errors:
 
 ```typescript
-import { SerpexClient, SerpApiException } from 'serpex';
+import { SerpexClient, SerpApiException } from "serpex";
 
 try {
-  const results = await client.search({ q: 'test query' });
+  const results = await client.search({ q: "test query" });
 } catch (error) {
   if (error instanceof SerpApiException) {
-    console.log('API Error:', error.message);
-    console.log('Status Code:', error.statusCode);
-    console.log('Details:', error.details);
+    console.log("API Error:", error.message);
+    console.log("Status Code:", error.statusCode);
+    console.log("Details:", error.details);
   }
 }
 ```
@@ -191,52 +223,57 @@ try {
 ## Examples
 
 ### Basic Search
+
 ```typescript
 const results = await client.search({
-  q: 'coffee shops near me'
+  q: "coffee shops near me",
 });
 ```
 
 ### Advanced Search with Filters
+
 ```typescript
 const results = await client.search({
-  q: 'latest AI news',
-  engine: 'google',
-  time_range: 'day',
-  category: 'web'
+  q: "latest AI news",
+  engine: "google",
+  time_range: "day",
+  category: "web",
 });
 ```
 
 ### Extract Web Content to LLM-Ready Data
 
 #### Extract from a Single URL
+
 ```typescript
 // Extract content from one website
 const result = await client.extract({
-  urls: ['https://example.com']
+  urls: ["https://example.com"],
 });
 
 if (result.results[0].success) {
   console.log(`✅ Extracted ${result.results[0].markdown?.length} characters`);
-  console.log('Markdown content:', result.results[0].markdown?.substring(0, 200) + '...');
+  console.log(
+    "Markdown content:",
+    result.results[0].markdown?.substring(0, 200) + "..."
+  );
 }
 ```
 
 #### Extract from Multiple URLs (up to 10 at once)
+
 ```typescript
 // Extract content from multiple websites (up to 10 URLs)
 const extractResults = await client.extract({
-  urls: [
-    'https://example.com',
-    'https://httpbin.org',
-    'https://github.com'
-  ]
+  urls: ["https://example.com", "https://httpbin.org", "https://github.com"],
 });
 
-console.log(`Successfully extracted ${extractResults.metadata.successful_crawls} pages`);
+console.log(
+  `Successfully extracted ${extractResults.metadata.successful_crawls} pages`
+);
 console.log(`Total credits used: ${extractResults.metadata.credits_used}`);
 
-extractResults.results.forEach(result => {
+extractResults.results.forEach((result) => {
   if (result.success) {
     console.log(`✅ ${result.url}: ${result.markdown?.length} characters`);
     // Use result.markdown for LLM processing
@@ -247,6 +284,7 @@ extractResults.results.forEach(result => {
 ```
 
 #### Sample Response
+
 ```typescript
 // Example response structure
 {

@@ -14,6 +14,7 @@ export interface SearchMetadata {
     response_time: number;
     timestamp: string;
     credits_used: number;
+    category?: string;
 }
 export interface SearchResponse {
     metadata: SearchMetadata;
@@ -26,12 +27,39 @@ export interface SearchResponse {
     infoboxes: any[];
     suggestions: string[];
 }
+export interface ExtractResult {
+    url: string;
+    success: boolean;
+    markdown?: string;
+    error?: string;
+    error_type?: string;
+    status_code?: number;
+    crawled_at?: string;
+    extraction_mode?: string;
+}
+export interface ExtractMetadata {
+    total_urls: number;
+    processed_urls: number;
+    successful_crawls: number;
+    failed_crawls: number;
+    credits_used: number;
+    response_time: number;
+    timestamp: string;
+}
+export interface ExtractResponse {
+    success: boolean;
+    results: ExtractResult[];
+    metadata: ExtractMetadata;
+}
+export interface ExtractParams {
+    urls: string[];
+}
 export interface SearchParams {
     q: string;
-    engine?: 'auto' | 'google' | 'bing' | 'duckduckgo' | 'brave' | 'yahoo' | 'yandex';
-    category?: 'web';
-    time_range?: 'all' | 'day' | 'week' | 'month' | 'year';
-    format?: 'json' | 'csv' | 'rss';
+    engine?: "auto" | "google" | "bing" | "duckduckgo" | "brave" | "yahoo" | "yandex";
+    category?: "web" | "news";
+    time_range?: "all" | "day" | "week" | "month" | "year";
+    format?: "json" | "csv" | "rss";
 }
 export interface SerpApiError {
     error: string;

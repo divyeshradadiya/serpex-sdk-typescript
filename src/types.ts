@@ -18,6 +18,7 @@ export interface SearchMetadata {
   response_time: number;
   timestamp: string;
   credits_used: number;
+  category?: string; // Optional category field for news searches
 }
 
 export interface SearchResponse {
@@ -69,16 +70,23 @@ export interface SearchParams {
   q: string;
 
   // Optional: Engine selection (defaults to 'auto')
-  engine?: 'auto' | 'google' | 'bing' | 'duckduckgo' | 'brave' | 'yahoo' | 'yandex';
+  engine?:
+    | "auto"
+    | "google"
+    | "bing"
+    | "duckduckgo"
+    | "brave"
+    | "yahoo"
+    | "yandex";
 
-  // Optional: Search category (currently only 'web' supported)
-  category?: 'web';
+  // Optional: Search category ('web' for general search, 'news' for news articles - always returns latest news)
+  category?: "web" | "news";
 
-  // Optional: Time range filter
-  time_range?: 'all' | 'day' | 'week' | 'month' | 'year';
+  // Optional: Time range filter (only applicable for 'web' category, ignored for 'news')
+  time_range?: "all" | "day" | "week" | "month" | "year";
 
   // Optional: Response format
-  format?: 'json' | 'csv' | 'rss';
+  format?: "json" | "csv" | "rss";
 }
 
 export interface SerpApiError {
@@ -95,7 +103,7 @@ export class SerpApiException extends Error {
 
   constructor(message: string, statusCode?: number, details?: any) {
     super(message);
-    this.name = 'SerpApiException';
+    this.name = "SerpApiException";
     this.statusCode = statusCode;
     this.details = details;
   }

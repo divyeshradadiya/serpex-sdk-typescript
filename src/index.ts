@@ -3,10 +3,16 @@ import {
   SearchParams,
   ExtractResponse,
   ExtractParams,
-  SerpApiException
-} from './types';
+  SerpApiException,
+} from "./types";
 
-export { SearchResponse, SearchParams, ExtractResponse, ExtractParams, SerpApiException };
+export {
+  SearchResponse,
+  SearchParams,
+  ExtractResponse,
+  ExtractParams,
+  SerpApiException,
+};
 
 export class SerpexClient {
   private baseUrl: string;
@@ -17,29 +23,33 @@ export class SerpexClient {
    * @param apiKey - Your API key from the Serpex dashboard
    * @param baseUrl - Base URL for the API (optional, defaults to production)
    */
-  constructor(apiKey: string, baseUrl: string = 'https://api.serpex.dev') {
-    if (!apiKey || typeof apiKey !== 'string') {
-      throw new Error('API key is required and must be a string');
+  constructor(apiKey: string, baseUrl: string = "https://api.serpex.dev") {
+    if (!apiKey || typeof apiKey !== "string") {
+      throw new Error("API key is required and must be a string");
     }
 
     this.apiKey = apiKey;
-    this.baseUrl = baseUrl.replace(/\/$/, ''); // Remove trailing slash
+    this.baseUrl = baseUrl.replace(/\/$/, ""); // Remove trailing slash
   }
 
   /**
    * Make an authenticated request to the API
    */
-  private async makeRequest(endpoint: string, params: Record<string, any> = {}, method: string = 'GET'): Promise<any> {
+  private async makeRequest(
+    endpoint: string,
+    params: Record<string, any> = {},
+    method: string = "GET"
+  ): Promise<any> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers: Record<string, string> = {
-      'Authorization': `Bearer ${this.apiKey}`,
-      'Content-Type': 'application/json'
+      Authorization: `Bearer ${this.apiKey}`,
+      "Content-Type": "application/json",
     };
 
     let finalUrl = url;
     let body: string | undefined;
 
-    if (method === 'POST') {
+    if (method === "POST") {
       // For POST requests, send params as JSON body
       body = JSON.stringify(params);
     } else {
@@ -48,7 +58,7 @@ export class SerpexClient {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (Array.isArray(value)) {
-            value.forEach(v => searchParams.append(key, v.toString()));
+            value.forEach((v) => searchParams.append(key, v.toString()));
           } else {
             searchParams.append(key, value.toString());
           }
@@ -63,7 +73,7 @@ export class SerpexClient {
     const response = await fetch(finalUrl, {
       method,
       headers,
-      body
+      body,
     });
 
     if (!response.ok) {
@@ -76,7 +86,7 @@ export class SerpexClient {
       }
 
       throw new SerpApiException(
-        errorData.error || 'API request failed',
+        errorData.error || "API request failed",
         response.status,
         errorData
       );
@@ -92,27 +102,35 @@ export class SerpexClient {
    */
   async search(params: SearchParams): Promise<SearchResponse> {
     if (!params.q) {
-      throw new Error('Query parameter (q) is required');
+      throw new Error("Query parameter (q) is required");
     }
 
-    if (typeof params.q !== 'string' || params.q.trim().length === 0) {
-      throw new Error('Query must be a non-empty string');
+    if (typeof params.q !== "string" || params.q.trim().length === 0) {
+      throw new Error("Query must be a non-empty string");
     }
 
     if (params.q.length > 500) {
-      throw new Error('Query too long (max 500 characters)');
+      throw new Error("Query too long (max 500 characters)");
     }
+
+    // Determine endpoint based on category
+    const category = params.category || "web";
+    const endpoint = category === "news" ? "/api/search/news" : "/api/search";
 
     // Prepare request parameters with only supported params
     const requestParams: Record<string, any> = {
       q: params.q,
-      engine: params.engine || 'auto', // Default to auto
-      category: params.category || 'web',
-      time_range: params.time_range || 'all',
-      format: params.format || 'json'
+      engine: params.engine || "auto", // Default to auto
+      format: params.format || "json",
     };
 
-    return this.makeRequest('/api/search', requestParams);
+    // Add category for web search, omit for news (news endpoint doesn't need it)
+    if (category === "web") {
+      requestParams.category = "web";
+      requestParams.time_range = params.time_range || "all";
+    }
+
+    return this.makeRequest(endpoint, requestParams);
   }
 
   /**
@@ -121,16 +139,22 @@ export class SerpexClient {
    * @returns Extraction results
    */
   async extract(params: ExtractParams): Promise<ExtractResponse> {
-    if (!params.urls || !Array.isArray(params.urls) || params.urls.length === 0) {
-      throw new Error('URLs array is required and must contain at least one URL');
+    if (
+      !params.urls ||
+      !Array.isArray(params.urls) ||
+      params.urls.length === 0
+    ) {
+      throw new Error(
+        "URLs array is required and must contain at least one URL"
+      );
     }
 
     if (params.urls.length > 10) {
-      throw new Error('Maximum 10 URLs allowed per request');
+      throw new Error("Maximum 10 URLs allowed per request");
     }
 
     // Validate URLs
-    const invalidUrls = params.urls.filter(url => {
+    const invalidUrls = params.urls.filter((url) => {
       try {
         new URL(url);
         return false;
@@ -140,14 +164,14 @@ export class SerpexClient {
     });
 
     if (invalidUrls.length > 0) {
-      throw new Error(`Invalid URLs provided: ${invalidUrls.join(', ')}`);
+      throw new Error(`Invalid URLs provided: ${invalidUrls.join(", ")}`);
     }
 
     // Prepare request parameters
     const requestParams: Record<string, any> = {
-      urls: params.urls
+      urls: params.urls,
     };
 
-    return this.makeRequest('/api/crawl', requestParams, 'POST');
+    return this.makeRequest("/api/crawl", requestParams, "POST");
   }
 }
