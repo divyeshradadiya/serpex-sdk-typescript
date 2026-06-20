@@ -18,6 +18,8 @@ export interface SearchMetadata {
   response_time: number;
   timestamp: string;
   credits_used: number;
+  from_cache?: boolean; // Whether this result was served from cache
+  status?: 'success' | 'no_results'; // Result status: 'success' if results found, 'no_results' if none
   category?: string; // Optional category field for news searches
 }
 
