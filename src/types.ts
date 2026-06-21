@@ -18,7 +18,7 @@ export interface SearchMetadata {
   response_time: number;
   timestamp: string;
   credits_used: number;
-  category?: string; // Optional category field for news searches
+  category?: string;
 }
 
 export interface SearchResponse {
@@ -37,6 +37,8 @@ export interface ExtractResult {
   url: string;
   success: boolean;
   markdown?: string;
+  html?: string;
+  stealth?: boolean;
   error?: string;
   error_type?: string;
   status_code?: number;
@@ -50,6 +52,7 @@ export interface ExtractMetadata {
   successful_crawls: number;
   failed_crawls: number;
   credits_used: number;
+  cached_free?: number;
   response_time: number;
   timestamp: string;
 }
@@ -63,6 +66,12 @@ export interface ExtractResponse {
 export interface ExtractParams {
   // Required: URLs to extract (max 10)
   urls: string[];
+
+  // Optional: Route through premium unblocker for difficult-to-crawl pages (default: false)
+  stealth?: boolean;
+
+  // Optional: Output format — 'markdown' (default) or 'html'
+  format?: "markdown" | "html";
 }
 
 export interface SearchParams {
@@ -79,10 +88,10 @@ export interface SearchParams {
     | "yahoo"
     | "yandex";
 
-  // Optional: Search category ('web' for general search, 'news' for news articles - always returns latest news)
-  category?: "web" | "news";
+  // Optional: Search category
+  category?: "web";
 
-  // Optional: Time range filter (only applicable for 'web' category, ignored for 'news')
+  // Optional: Time range filter
   time_range?: "all" | "day" | "week" | "month" | "year";
 
   // Optional: Response format

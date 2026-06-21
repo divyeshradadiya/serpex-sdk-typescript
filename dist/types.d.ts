@@ -31,6 +31,8 @@ export interface ExtractResult {
     url: string;
     success: boolean;
     markdown?: string;
+    html?: string;
+    stealth?: boolean;
     error?: string;
     error_type?: string;
     status_code?: number;
@@ -43,6 +45,7 @@ export interface ExtractMetadata {
     successful_crawls: number;
     failed_crawls: number;
     credits_used: number;
+    cached_free?: number;
     response_time: number;
     timestamp: string;
 }
@@ -53,11 +56,13 @@ export interface ExtractResponse {
 }
 export interface ExtractParams {
     urls: string[];
+    stealth?: boolean;
+    format?: "markdown" | "html";
 }
 export interface SearchParams {
     q: string;
     engine?: "auto" | "google" | "bing" | "duckduckgo" | "brave" | "yahoo" | "yandex";
-    category?: "web" | "news";
+    category?: "web";
     time_range?: "all" | "day" | "week" | "month" | "year";
     format?: "json" | "csv" | "rss";
 }

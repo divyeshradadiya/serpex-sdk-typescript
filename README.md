@@ -56,8 +56,16 @@ new SerpexClient(apiKey: string, baseUrl?: string)
 Extract content from web pages and convert them to LLM-ready markdown data. Accepts up to 10 URLs per request.
 
 ```typescript
+// Basic usage
 const results = await client.extract({
   urls: ["https://example.com", "https://httpbin.org"],
+});
+
+// With stealth mode and HTML output
+const stealthResults = await client.extract({
+  urls: ["https://example.com"],
+  stealth: true,
+  format: "html",
 });
 ```
 
@@ -69,6 +77,12 @@ The `ExtractParams` interface supports extraction parameters:
 interface ExtractParams {
   // Required: URLs to extract (max 10)
   urls: string[];
+
+  // Optional: Route through premium unblocker for difficult-to-crawl pages (default: false)
+  stealth?: boolean;
+
+  // Optional: Output format — 'markdown' (default) or 'html'
+  format?: "markdown" | "html";
 }
 ```
 
@@ -85,6 +99,8 @@ interface ExtractResult {
   url: string;
   success: boolean;
   markdown?: string;
+  html?: string;        // Populated when format='html'
+  stealth?: boolean;    // Whether stealth mode was used for this result
   error?: string;
   error_type?: string;
   status_code?: number;
@@ -98,6 +114,7 @@ interface ExtractMetadata {
   successful_crawls: number;
   failed_crawls: number;
   credits_used: number;
+  cached_free?: number; // Number of URLs served from cache (no credit charge)
   response_time: number;
   timestamp: string;
 }
@@ -246,7 +263,7 @@ const results = await client.search({
 #### Extract from a Single URL
 
 ```typescript
-// Extract content from one website
+// Extract content from one website (markdown, default)
 const result = await client.extract({
   urls: ["https://example.com"],
 });
@@ -257,6 +274,17 @@ if (result.results[0].success) {
     "Markdown content:",
     result.results[0].markdown?.substring(0, 200) + "..."
   );
+}
+
+// Extract with stealth mode and HTML output
+const stealthResult = await client.extract({
+  urls: ["https://example.com"],
+  stealth: true,
+  format: "html",
+});
+
+if (stealthResult.results[0].success) {
+  console.log("HTML content:", stealthResult.results[0].html?.substring(0, 200));
 }
 ```
 
@@ -294,6 +322,7 @@ extractResults.results.forEach((result) => {
       url: 'https://example.com',
       success: true,
       markdown: '# Example Domain\n\nThis domain is for use in...',
+      stealth: false,
       status_code: 200
     }
   ],
@@ -303,6 +332,7 @@ extractResults.results.forEach((result) => {
     successful_crawls: 1,
     failed_crawls: 0,
     credits_used: 3,
+    cached_free: 0,
     response_time: 255,
     timestamp: '2025-11-13T10:30:00.000Z'
   }

@@ -81,16 +81,15 @@ class SerpexClient {
         if (params.q.length > 500) {
             throw new Error("Query too long (max 500 characters)");
         }
-        // Determine endpoint based on category
         const category = params.category || "web";
-        const endpoint = category === "news" ? "/api/search/news" : "/api/search";
+        const endpoint = "/api/search";
         // Prepare request parameters with only supported params
         const requestParams = {
             q: params.q,
             engine: params.engine || "auto", // Default to auto
             format: params.format || "json",
         };
-        // Add category for web search, omit for news (news endpoint doesn't need it)
+        // Add category + time_range for the search
         if (category === "web") {
             requestParams.category = "web";
             requestParams.time_range = params.time_range || "all";
@@ -128,6 +127,12 @@ class SerpexClient {
         const requestParams = {
             urls: params.urls,
         };
+        if (params.stealth !== undefined) {
+            requestParams.stealth = params.stealth;
+        }
+        if (params.format !== undefined) {
+            requestParams.format = params.format;
+        }
         return this.makeRequest("/api/crawl", requestParams, "POST");
     }
 }
