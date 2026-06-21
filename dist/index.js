@@ -83,7 +83,6 @@ class SerpexClient {
         }
         const requestParams = {
             q: params.q,
-            engine: params.engine || "auto",
         };
         return this.makeRequest("/api/search", requestParams);
     }

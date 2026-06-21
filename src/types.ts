@@ -74,16 +74,6 @@ export interface ExtractParams {
 export interface SearchParams {
   // Required: search query
   q: string;
-
-  // Optional: Engine selection (defaults to 'auto')
-  engine?:
-    | "auto"
-    | "google"
-    | "bing"
-    | "duckduckgo"
-    | "brave"
-    | "yahoo"
-    | "yandex";
 }
 
 export interface SerpApiError {

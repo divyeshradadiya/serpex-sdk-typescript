@@ -58,7 +58,6 @@ export interface ExtractParams {
 }
 export interface SearchParams {
     q: string;
-    engine?: "auto" | "google" | "bing" | "duckduckgo" | "brave" | "yahoo" | "yandex";
 }
 export interface SerpApiError {
     error: string;

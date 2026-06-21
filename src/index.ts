@@ -97,7 +97,7 @@ export class SerpexClient {
 
   /**
    * Search using the SERP API
-   * @param params - Search parameters including query and engine
+   * @param params - Search parameters including query
    * @returns Search results
    */
   async search(params: SearchParams): Promise<SearchResponse> {
@@ -115,7 +115,6 @@ export class SerpexClient {
 
     const requestParams: Record<string, any> = {
       q: params.q,
-      engine: params.engine || "auto",
     };
 
     return this.makeRequest("/api/search", requestParams);
