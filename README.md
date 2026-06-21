@@ -138,45 +138,9 @@ interface SearchParams {
     | "brave"
     | "yahoo"
     | "yandex";
-
-  // Optional: Search category ('web' for general search, 'news' for news articles - always returns latest news)
-  category?: "web" | "news";
-
-  // Optional: Time range filter (only applicable for 'web' category, ignored for 'news')
-  time_range?: "all" | "day" | "week" | "month" | "year";
-
-  // Optional: Response format
-  format?: "json" | "csv" | "rss";
 }
 ```
 
-### News Search Example
-
-News search always returns the latest news articles. The `time_range` parameter is ignored for news searches.
-
-```typescript
-// Search for latest news articles
-const newsResults = await client.search({
-  q: "artificial intelligence",
-  engine: "google",
-  category: "news", // Always returns latest news
-});
-
-console.log(newsResults.results[0].title);
-console.log(newsResults.results[0].published_date);
-```
-
-q: "artificial intelligence",
-engine: "google",
-category: "news",
-});
-
-console.log(newsResults.results[0].title);
-console.log(newsResults.results[0].published_date);
-
-```
-
-```
 
 ## Supported Engines
 
@@ -197,6 +161,8 @@ interface SearchResponse {
     response_time: number;
     timestamp: string;
     credits_used: number;
+    from_cache?: boolean;
+    status?: string;
   };
   id: string;
   query: string;
@@ -212,10 +178,6 @@ interface SearchResponse {
     duration?: string;
     score?: number;
   }>;
-  answers: any[];
-  corrections: string[];
-  infoboxes: any[];
-  suggestions: string[];
 }
 ```
 
@@ -247,16 +209,6 @@ const results = await client.search({
 });
 ```
 
-### Advanced Search with Filters
-
-```typescript
-const results = await client.search({
-  q: "latest AI news",
-  engine: "google",
-  time_range: "day",
-  category: "web",
-});
-```
 
 ### Extract Web Content to LLM-Ready Data
 

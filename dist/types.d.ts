@@ -14,7 +14,8 @@ export interface SearchMetadata {
     response_time: number;
     timestamp: string;
     credits_used: number;
-    category?: string;
+    from_cache?: boolean;
+    status?: string;
 }
 export interface SearchResponse {
     metadata: SearchMetadata;
@@ -22,10 +23,6 @@ export interface SearchResponse {
     query: string;
     engines: string[];
     results: SearchResult[];
-    answers: any[];
-    corrections: string[];
-    infoboxes: any[];
-    suggestions: string[];
 }
 export interface ExtractResult {
     url: string;
@@ -62,9 +59,6 @@ export interface ExtractParams {
 export interface SearchParams {
     q: string;
     engine?: "auto" | "google" | "bing" | "duckduckgo" | "brave" | "yahoo" | "yandex";
-    category?: "web";
-    time_range?: "all" | "day" | "week" | "month" | "year";
-    format?: "json" | "csv" | "rss";
 }
 export interface SerpApiError {
     error: string;

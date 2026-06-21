@@ -97,7 +97,7 @@ export class SerpexClient {
 
   /**
    * Search using the SERP API
-   * @param params - Search parameters including query, engine, category, time_range
+   * @param params - Search parameters including query and engine
    * @returns Search results
    */
   async search(params: SearchParams): Promise<SearchResponse> {
@@ -113,23 +113,12 @@ export class SerpexClient {
       throw new Error("Query too long (max 500 characters)");
     }
 
-    const category = params.category || "web";
-    const endpoint = "/api/search";
-
-    // Prepare request parameters with only supported params
     const requestParams: Record<string, any> = {
       q: params.q,
-      engine: params.engine || "auto", // Default to auto
-      format: params.format || "json",
+      engine: params.engine || "auto",
     };
 
-    // Add category + time_range for the search
-    if (category === "web") {
-      requestParams.category = "web";
-      requestParams.time_range = params.time_range || "all";
-    }
-
-    return this.makeRequest(endpoint, requestParams);
+    return this.makeRequest("/api/search", requestParams);
   }
 
   /**

@@ -18,7 +18,8 @@ export interface SearchMetadata {
   response_time: number;
   timestamp: string;
   credits_used: number;
-  category?: string;
+  from_cache?: boolean;
+  status?: string;
 }
 
 export interface SearchResponse {
@@ -27,10 +28,6 @@ export interface SearchResponse {
   query: string;
   engines: string[];
   results: SearchResult[];
-  answers: any[];
-  corrections: string[];
-  infoboxes: any[];
-  suggestions: string[];
 }
 
 export interface ExtractResult {
@@ -87,15 +84,6 @@ export interface SearchParams {
     | "brave"
     | "yahoo"
     | "yandex";
-
-  // Optional: Search category
-  category?: "web";
-
-  // Optional: Time range filter
-  time_range?: "all" | "day" | "week" | "month" | "year";
-
-  // Optional: Response format
-  format?: "json" | "csv" | "rss";
 }
 
 export interface SerpApiError {
