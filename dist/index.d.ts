@@ -15,7 +15,7 @@ export declare class SerpexClient {
     private makeRequest;
     /**
      * Search using the SERP API
-     * @param params - Search parameters including query and engine
+     * @param params - Search parameters including query
      * @returns Search results
      */
     search(params: SearchParams): Promise<SearchResponse>;

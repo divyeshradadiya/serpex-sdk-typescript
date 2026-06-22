@@ -4,7 +4,6 @@ export interface SearchResult {
     snippet: string;
     position: number;
     engine: string;
-    published_date: string | null;
     img_src?: string;
     duration?: string;
     score?: number;

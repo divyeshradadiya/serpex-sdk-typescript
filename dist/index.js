@@ -68,7 +68,7 @@ class SerpexClient {
     }
     /**
      * Search using the SERP API
-     * @param params - Search parameters including query and engine
+     * @param params - Search parameters including query
      * @returns Search results
      */
     async search(params) {

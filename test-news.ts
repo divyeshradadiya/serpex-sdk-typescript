@@ -23,7 +23,6 @@ async function testNewsSearch() {
     console.log("Number of results:", newsResults.results.length);
     console.log("First result:", {
       title: newsResults.results[0]?.title,
-      published_date: newsResults.results[0]?.published_date,
       engine: newsResults.results[0]?.engine,
     });
     console.log("\n");
