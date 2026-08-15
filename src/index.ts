@@ -113,9 +113,25 @@ export class SerpexClient {
       throw new Error("Query too long (max 500 characters)");
     }
 
+    if (
+      params.content_results !== undefined &&
+      params.content_results !== 5 &&
+      params.content_results !== 10
+    ) {
+      throw new Error("content_results must be exactly 5 or 10");
+    }
+
     const requestParams: Record<string, any> = {
       q: params.q,
     };
+
+    if (params.include_content !== undefined) {
+      requestParams.include_content = params.include_content;
+    }
+
+    if (params.content_results !== undefined) {
+      requestParams.content_results = params.content_results;
+    }
 
     return this.makeRequest("/api/search", requestParams);
   }

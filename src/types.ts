@@ -10,6 +10,12 @@ export interface SearchResult {
   img_src?: string;
   duration?: string;
   score?: number;
+  // Present only when `include_content` was requested. Best-effort per-URL
+  // extraction: a successful fetch sets `content`, a failed one sets
+  // `content_error` instead — the two are mutually exclusive and both are
+  // omitted entirely when content wasn't requested for this result.
+  content?: string;
+  content_error?: string;
 }
 
 export interface SearchMetadata {
@@ -19,6 +25,9 @@ export interface SearchMetadata {
   credits_used: number;
   from_cache?: boolean;
   status?: string;
+  // Present only when `include_content` was requested.
+  content_requested?: number;
+  content_delivered?: number;
 }
 
 export interface SearchResponse {
@@ -73,6 +82,13 @@ export interface ExtractParams {
 export interface SearchParams {
   // Required: search query
   q: string;
+
+  // Optional: also fetch page content (markdown) for top results (default: false)
+  include_content?: boolean;
+
+  // Optional: number of top results to fetch content for — must be exactly
+  // 5 or 10 (default: 5). Only relevant when include_content is true.
+  content_results?: 5 | 10;
 }
 
 export interface SerpApiError {
