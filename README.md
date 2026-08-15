@@ -138,8 +138,21 @@ interface SearchParams {
     | "brave"
     | "yahoo"
     | "yandex";
+
+  // Optional: also fetch page content (markdown) for top results (default: false)
+  include_content?: boolean;
+
+  // Optional: number of top results to fetch content for — must be exactly
+  // 5 or 10 (default: 5). Only relevant when include_content is true.
+  content_results?: 5 | 10;
 }
 ```
+
+| Param | Type | Default | Notes |
+|---|---|---|---|
+| `q` | `string` | — | Required search query (max 500 chars) |
+| `include_content` | `boolean` | `false` | Also fetch page content (markdown) for top results |
+| `content_results` | `5 \| 10` | `5` | How many top results to fetch content for; must be exactly `5` or `10` |
 
 
 ## Supported Engines
@@ -163,6 +176,9 @@ interface SearchResponse {
     credits_used: number;
     from_cache?: boolean;
     status?: string;
+    // Present only when include_content was requested
+    content_requested?: number;
+    content_delivered?: number;
   };
   id: string;
   query: string;
@@ -173,10 +189,13 @@ interface SearchResponse {
     snippet: string;
     position: number;
     engine: string;
-    published_date: string | null;
     img_src?: string;
     duration?: string;
     score?: number;
+    // Present only when include_content was requested. Best-effort — a
+    // failed extraction sets content_error instead of content.
+    content?: string;
+    content_error?: string;
   }>;
 }
 ```
@@ -207,6 +226,31 @@ try {
 const results = await client.search({
   q: "coffee shops near me",
 });
+```
+
+### Search with Page Content
+
+Fetch page content (markdown) for the top results inline with the search —
+best-effort, so check each result for `content` vs `content_error`.
+
+```typescript
+const results = await client.search({
+  q: "best espresso machines 2025",
+  include_content: true,
+  content_results: 10, // must be exactly 5 or 10
+});
+
+console.log(
+  `Content delivered for ${results.metadata.content_delivered}/${results.metadata.content_requested} requested results`
+);
+
+for (const result of results.results) {
+  if (result.content) {
+    console.log(`✅ ${result.url}: ${result.content.length} chars of markdown`);
+  } else if (result.content_error) {
+    console.log(`❌ ${result.url}: ${result.content_error}`);
+  }
+}
 ```
 
 

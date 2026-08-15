@@ -4,10 +4,11 @@ export interface SearchResult {
     snippet: string;
     position: number;
     engine: string;
-    published_date: string | null;
     img_src?: string;
     duration?: string;
     score?: number;
+    content?: string;
+    content_error?: string;
 }
 export interface SearchMetadata {
     number_of_results: number;
@@ -16,6 +17,8 @@ export interface SearchMetadata {
     credits_used: number;
     from_cache?: boolean;
     status?: string;
+    content_requested?: number;
+    content_delivered?: number;
 }
 export interface SearchResponse {
     metadata: SearchMetadata;
@@ -58,6 +61,8 @@ export interface ExtractParams {
 }
 export interface SearchParams {
     q: string;
+    include_content?: boolean;
+    content_results?: 5 | 10;
 }
 export interface SerpApiError {
     error: string;
