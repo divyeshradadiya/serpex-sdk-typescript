@@ -136,6 +136,27 @@ class SerpexClient {
         }
         return this.makeRequest("/api/crawl", requestParams, "POST");
     }
+    /**
+     * Fetch usage statistics and the current credit balance for this API key.
+     *
+     * Useful for checking your remaining balance before a large batch, or for
+     * surfacing consumption in your own dashboard.
+     *
+     * @param params - Optional: `days` of history to summarise (default 30)
+     * @returns Request counts per engine, plus the workspace credit balance
+     */
+    async usage(params = {}) {
+        if (params.days !== undefined) {
+            if (!Number.isInteger(params.days) || params.days < 1) {
+                throw new Error("days must be a positive integer");
+            }
+        }
+        const requestParams = {};
+        if (params.days !== undefined) {
+            requestParams.days = params.days;
+        }
+        return this.makeRequest("/api/usage", requestParams);
+    }
 }
 exports.SerpexClient = SerpexClient;
 //# sourceMappingURL=index.js.map

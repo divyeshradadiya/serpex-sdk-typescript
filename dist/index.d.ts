@@ -1,5 +1,5 @@
-import { SearchResponse, SearchParams, ExtractResponse, ExtractParams, SerpApiException } from "./types";
-export { SearchResponse, SearchParams, ExtractResponse, ExtractParams, SerpApiException, };
+import { SearchResponse, SearchParams, ExtractResponse, ExtractParams, UsageParams, UsageResponse, StealthErrorCode, SerpApiException } from "./types";
+export { SearchResponse, SearchParams, ExtractResponse, ExtractParams, UsageParams, UsageResponse, StealthErrorCode, SerpApiException, };
 export declare class SerpexClient {
     private baseUrl;
     private apiKey;
@@ -25,5 +25,15 @@ export declare class SerpexClient {
      * @returns Extraction results
      */
     extract(params: ExtractParams): Promise<ExtractResponse>;
+    /**
+     * Fetch usage statistics and the current credit balance for this API key.
+     *
+     * Useful for checking your remaining balance before a large batch, or for
+     * surfacing consumption in your own dashboard.
+     *
+     * @param params - Optional: `days` of history to summarise (default 30)
+     * @returns Request counts per engine, plus the workspace credit balance
+     */
+    usage(params?: UsageParams): Promise<UsageResponse>;
 }
 //# sourceMappingURL=index.d.ts.map

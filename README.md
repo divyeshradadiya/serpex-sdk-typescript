@@ -101,7 +101,8 @@ interface ExtractResult {
   markdown?: string;
   html?: string;        // Populated when format='html'
   stealth?: boolean;    // Whether stealth mode was used for this result
-  error?: string;
+  error?: string;       // Human-readable reason, e.g. "target returned HTTP 404"
+  error_code?: string;  // Stable code (stealth only) — see "Stealth error codes"
   error_type?: string;
   status_code?: number;
   crawled_at?: string;
@@ -117,6 +118,64 @@ interface ExtractMetadata {
   cached_free?: number; // Number of URLs served from cache (no credit charge)
   response_time: number;
   timestamp: string;
+}
+```
+
+### Stealth error codes
+
+When `stealth: true`, a failed result carries a stable `error_code` alongside the
+human-readable `error`. Branch on the code rather than parsing the message — it
+tells you whether the problem is with **your URL** or with **our service**:
+
+| `error_code` | `error_type` | Meaning | Retry? |
+|---|---|---|---|
+| `stealth_target_unreachable` | `connection` | The domain did not resolve or refused the connection — the site is likely gone | No |
+| `stealth_target_status` | `http` | The page answered with an error status (see `status_code`) | No |
+| `stealth_target_empty` | `blocked` | The page answered `200` with no usable body — typically an anti-bot interstitial | Maybe |
+| `stealth_timeout` | `timeout` | The page did not finish rendering in time | Yes |
+| `stealth_provider_unavailable` | `server_error` | **Our** unblocking provider was unavailable — not a problem with your URL | Yes |
+| `stealth_network` | `connection` | Network error reaching our unblocker | Yes |
+| `stealth_unconfigured` | `server_error` | Stealth is not enabled on this deployment | No |
+
+```typescript
+const { results } = await client.extract({ urls, stealth: true });
+
+for (const r of results) {
+  if (r.success) continue;
+  if (r.error_code === "stealth_target_unreachable") {
+    // The domain is dead — drop it from your list.
+  } else if (r.error_code === "stealth_provider_unavailable") {
+    // Our side. Safe to retry shortly.
+  }
+}
+```
+
+##### `usage(params?: UsageParams): Promise<UsageResponse>`
+
+Check your credit balance and request history — useful before a large batch.
+
+```typescript
+const usage = await client.usage();          // last 30 days
+const week  = await client.usage({ days: 7 });
+
+console.log(usage.credits.balance);          // credits remaining
+console.log(usage.statistics.totalRequests); // requests in the period
+console.log(usage.statistics.engineStats);   // { duckduckgo: 120, yahoo: 30 }
+```
+
+```typescript
+interface UsageResponse {
+  api_key: string;
+  organization_id: string;
+  period_days: number;
+  statistics: {
+    totalRequests: number;
+    successfulRequests: number;
+    failedRequests: number;
+    engineStats: Record<string, number>;
+  };
+  credits: { balance: number; totalUsed?: number };
+  recent_requests?: Array<Record<string, any>>;
 }
 ```
 
