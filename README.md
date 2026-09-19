@@ -148,11 +148,11 @@ Check your credit balance and request history — useful before a large batch.
 
 ```typescript
 const usage = await client.usage();          // last 30 days
-const week  = await client.usage({ days: 7 });
+const week  = await client.usage({ days: 7 }); // 1-90 (larger values are capped at 90)
 
 console.log(usage.credits.balance);          // credits remaining
 console.log(usage.statistics.totalRequests); // requests in the period
-console.log(usage.statistics.engineStats);   // { duckduckgo: 120, yahoo: 30 }
+console.log(usage.statistics.engineStats);   // { search: 120, crawl: 30, stealth: 5 }
 ```
 
 ```typescript

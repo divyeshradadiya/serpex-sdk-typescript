@@ -90,7 +90,7 @@ export interface UsageStatistics {
     totalRequests: number;
     successfulRequests: number;
     failedRequests: number;
-    /** Requests per search engine over the period. */
+    /** Requests per product over the period: `search`, `crawl`, `stealth` (only those used). */
     engineStats: Record<string, number>;
 }
 export interface UsageCredits {
