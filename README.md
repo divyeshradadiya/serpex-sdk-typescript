@@ -20,20 +20,12 @@ import { SerpexClient } from "serpex";
 // Initialize the client with your API key
 const client = new SerpexClient("your-api-key-here");
 
-// Search with auto-routing (recommended)
+// Every search is auto-routed to the best available source
 const results = await client.search({
   q: "typescript tutorial",
-  engine: "auto",
-});
-
-// Search with specific engine
-const googleResults = await client.search({
-  q: "typescript tutorial",
-  engine: "google",
 });
 
 console.log(results.results[0].title);
-console.log(googleResults.results[0].title);
 ```
 
 ## API Reference
@@ -188,16 +180,6 @@ interface SearchParams {
   // Required: search query
   q: string;
 
-  // Optional: Engine selection (defaults to 'auto')
-  engine?:
-    | "auto"
-    | "google"
-    | "bing"
-    | "duckduckgo"
-    | "brave"
-    | "yahoo"
-    | "yandex";
-
   // Optional: also fetch page content (markdown) for top results (default: false)
   include_content?: boolean;
 
@@ -214,15 +196,12 @@ interface SearchParams {
 | `content_results` | `5 \| 10` | `5` | How many top results to fetch content for; must be exactly `5` or `10` |
 
 
-## Supported Engines
+## Engine selection
 
-- **auto**: Automatically routes to the best available search engine
-- **google**: Google's primary search engine
-- **bing**: Microsoft's search engine
-- **duckduckgo**: Privacy-focused search engine
-- **brave**: Privacy-first search engine
-- **yahoo**: Yahoo search engine
-- **yandex**: Russian search engine
+There is none — every search is automatically routed to the best available
+source, with fallback. The legacy `engine` / `engines` parameters are
+deprecated and ignored by the API; requests that still send them get a
+`Deprecation` response header.
 
 ## Response Format
 
