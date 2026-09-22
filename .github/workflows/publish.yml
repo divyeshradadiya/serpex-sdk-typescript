@@ -1,10 +1,12 @@
 name: Publish Package to npmjs
+# npm Trusted Publishing (OIDC): no NPM_TOKEN, nothing to expire. Publish = push a `v<version>` tag.
 on:
-  release:
-    types: [published]
   push:
     tags:
       - "v*"
+permissions:
+  contents: read
+  id-token: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,7 +16,6 @@ jobs:
         with:
           node-version: "20.x"
           registry-url: "https://registry.npmjs.org"
+      - run: npm install -g npm@latest # trusted publishing needs npm >= 11.5.1
       - run: npm ci
       - run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
