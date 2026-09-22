@@ -14,14 +14,16 @@ export declare class SerpexClient {
      */
     private makeRequest;
     /**
-     * Search using the SERP API
+     * Run a real-time web search.
+     *
+     * `params.engine` is deprecated and ignored (not sent to the API).
      * @param params - Search parameters including query
      * @returns Search results
      */
     search(params: SearchParams): Promise<SearchResponse>;
     /**
-     * Extract content from web pages
-     * @param params - Extraction parameters including URLs to scrape
+     * Extract page content (markdown or HTML) from up to 10 URLs
+     * @param params - Extraction parameters including the URLs to extract
      * @returns Extraction results
      */
     extract(params: ExtractParams): Promise<ExtractResponse>;
@@ -32,7 +34,7 @@ export declare class SerpexClient {
      * surfacing consumption in your own dashboard.
      *
      * @param params - Optional: `days` of history to summarise (default 30)
-     * @returns Request counts per engine, plus the workspace credit balance
+     * @returns Request counts per product (`engineStats`), plus the workspace credit balance
      */
     usage(params?: UsageParams): Promise<UsageResponse>;
 }

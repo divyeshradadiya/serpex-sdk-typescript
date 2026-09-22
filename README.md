@@ -1,6 +1,8 @@
 # serpex
 
-Official TypeScript SDK for the Serpex SERP API - Fetch search results in JSON format.
+Official TypeScript SDK for Serpex — a real-time web search API, plus page content
+extraction (`extract`) that turns any URL into LLM-ready markdown. Built for AI
+agents, LLM tools and RAG pipelines.
 
 ## Installation
 
@@ -20,7 +22,7 @@ import { SerpexClient } from "serpex";
 // Initialize the client with your API key
 const client = new SerpexClient("your-api-key-here");
 
-// Every search is auto-routed to the best available source
+// One search engine — no engine to pick
 const results = await client.search({
   q: "typescript tutorial",
 });
@@ -70,7 +72,7 @@ interface ExtractParams {
   // Required: URLs to extract (max 10)
   urls: string[];
 
-  // Optional: Route through premium unblocker for difficult-to-crawl pages (default: false)
+  // Optional: premium extraction mode for pages that standard extraction can't read (default: false)
   stealth?: boolean;
 
   // Optional: Output format — 'markdown' (default) or 'html'
@@ -123,10 +125,10 @@ tells you whether the problem is with **your URL** or with **our service**:
 |---|---|---|---|
 | `stealth_target_unreachable` | `connection` | The domain did not resolve or refused the connection — the site is likely gone | No |
 | `stealth_target_status` | `http` | The page answered with an error status (see `status_code`) | No |
-| `stealth_target_empty` | `blocked` | The page answered `200` with no usable body — typically an anti-bot interstitial | Maybe |
+| `stealth_target_empty` | `blocked` | The page answered `200` with no usable content | Maybe |
 | `stealth_timeout` | `timeout` | The page did not finish rendering in time | Yes |
-| `stealth_provider_unavailable` | `server_error` | **Our** unblocking provider was unavailable — not a problem with your URL | Yes |
-| `stealth_network` | `connection` | Network error reaching our unblocker | Yes |
+| `stealth_provider_unavailable` | `server_error` | **Our** stealth extraction service was unavailable — not a problem with your URL | Yes |
+| `stealth_network` | `connection` | Network error inside our stealth extraction service | Yes |
 | `stealth_unconfigured` | `server_error` | Stealth is not enabled on this deployment | No |
 
 ```typescript
@@ -196,12 +198,14 @@ interface SearchParams {
 | `content_results` | `5 \| 10` | `5` | How many top results to fetch content for; must be exactly `5` or `10` |
 
 
-## Engine selection
+## The `engine` parameter (deprecated)
 
-There is none — every search is automatically routed to the best available
-source, with fallback. The legacy `engine` / `engines` parameters are
-deprecated and ignored by the API; requests that still send them get a
-`Deprecation` response header.
+Serpex is one search engine, so there is nothing to select. The legacy
+`engine` / `engines` request parameters are deprecated and ignored by the API
+(since 2026-06); requests that still send them get a `Deprecation` response
+header. `SearchParams.engine` is still accepted by the SDK so existing code
+keeps compiling, but it is not sent. The `engines` / `engine` response fields
+remain for compatibility.
 
 ## Response Format
 
@@ -220,13 +224,13 @@ interface SearchResponse {
   };
   id: string;
   query: string;
-  engines: string[];
+  engines: string[]; // legacy field, kept for compatibility
   results: Array<{
     title: string;
     url: string;
     snippet: string;
     position: number;
-    engine: string;
+    engine: string; // legacy field, kept for compatibility
     img_src?: string;
     duration?: string;
     score?: number;
