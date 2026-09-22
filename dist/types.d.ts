@@ -3,6 +3,7 @@ export interface SearchResult {
     url: string;
     snippet: string;
     position: number;
+    /** Legacy field kept for compatibility — Serpex is a single engine. */
     engine: string;
     img_src?: string;
     duration?: string;
@@ -24,6 +25,7 @@ export interface SearchResponse {
     metadata: SearchMetadata;
     id: string;
     query: string;
+    /** Legacy field kept for compatibility — Serpex is a single engine. */
     engines: string[];
     results: SearchResult[];
 }
@@ -42,10 +44,10 @@ export interface ExtractResult {
      * Crucially it separates a problem with YOUR url from a problem on OUR side:
      *   stealth_target_unreachable  — the domain did not resolve / refused us
      *   stealth_target_status       — the page answered with an error status
-     *   stealth_target_empty        — 200 with no usable body (anti-bot page)
+     *   stealth_target_empty        — 200 with no usable content
      *   stealth_timeout             — the page did not finish rendering in time
-     *   stealth_provider_unavailable— our unblocker was unavailable: retry
-     *   stealth_network             — network error reaching our unblocker
+     *   stealth_provider_unavailable— our stealth extraction service was unavailable: retry
+     *   stealth_network             — network error inside our stealth extraction service
      *   stealth_unconfigured        — stealth is not enabled on this deployment
      */
     error_code?: StealthErrorCode | string;
@@ -81,6 +83,11 @@ export interface SearchParams {
     q: string;
     include_content?: boolean;
     content_results?: 5 | 10;
+    /**
+     * @deprecated Ignored by the API since 2026-06 — Serpex is a single search
+     * engine. Still accepted so existing code compiles; the SDK does not send it.
+     */
+    engine?: string;
 }
 export interface UsageParams {
     /** How many days of history to summarise (default: 30). */
@@ -115,7 +122,9 @@ export interface UsageResponse {
 export interface SerpApiError {
     error: string;
     details?: string;
+    /** @deprecated Legacy field; the API no longer validates `engine`. */
     invalid_engines?: string[];
+    /** @deprecated Legacy field; the API no longer validates `engine`. */
     supported_engines?: string[];
     retryAfter?: number;
 }

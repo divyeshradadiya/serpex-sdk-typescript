@@ -1,7 +1,7 @@
 {
   "name": "serpex",
-  "version": "2.10.2",
-  "description": "Official TypeScript SDK for Serpex search API - Fetch search results in JSON format",
+  "version": "2.10.3",
+  "description": "Official TypeScript SDK for Serpex \u2014 real-time web search API and page content extraction for AI agents, LLM and RAG apps",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -19,12 +19,16 @@
     "format": "prettier --write src/**/*.ts"
   },
   "keywords": [
-    "serp",
+    "serpex",
     "search",
-    "api",
-    "google",
-    "search-results",
-    "seo",
+    "search-api",
+    "web-search",
+    "real-time-search",
+    "serp",
+    "extract",
+    "ai-agents",
+    "llm",
+    "rag",
     "typescript",
     "sdk"
   ],
@@ -58,5 +62,12 @@
   },
   "engines": {
     "node": ">=16.0.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": [
+      "<rootDir>/test/**/*.test.ts"
+    ]
   }
 }

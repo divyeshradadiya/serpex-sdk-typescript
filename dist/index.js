@@ -67,7 +67,9 @@ class SerpexClient {
         return response.json();
     }
     /**
-     * Search using the SERP API
+     * Run a real-time web search.
+     *
+     * `params.engine` is deprecated and ignored (not sent to the API).
      * @param params - Search parameters including query
      * @returns Search results
      */
@@ -98,8 +100,8 @@ class SerpexClient {
         return this.makeRequest("/api/search", requestParams);
     }
     /**
-     * Extract content from web pages
-     * @param params - Extraction parameters including URLs to scrape
+     * Extract page content (markdown or HTML) from up to 10 URLs
+     * @param params - Extraction parameters including the URLs to extract
      * @returns Extraction results
      */
     async extract(params) {
@@ -143,7 +145,7 @@ class SerpexClient {
      * surfacing consumption in your own dashboard.
      *
      * @param params - Optional: `days` of history to summarise (default 30)
-     * @returns Request counts per engine, plus the workspace credit balance
+     * @returns Request counts per product (`engineStats`), plus the workspace credit balance
      */
     async usage(params = {}) {
         if (params.days !== undefined) {
