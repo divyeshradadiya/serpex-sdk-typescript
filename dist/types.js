@@ -1,5 +1,5 @@
 "use strict";
-// TypeScript SDK for the Serpex real-time web search API
+// TypeScript SDK for Serpex — the web search API and extract API for AI agents
 // Types and interfaces
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SerpApiException = void 0;

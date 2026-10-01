@@ -3,8 +3,11 @@ export interface SearchResult {
     url: string;
     snippet: string;
     position: number;
-    /** Legacy field kept for compatibility — Serpex is a single engine. */
-    engine: string;
+    /**
+     * @deprecated Always "auto" today and may be removed from responses in a
+     * later API version. Optional so code does not rely on it.
+     */
+    engine?: string;
     img_src?: string;
     duration?: string;
     score?: number;
@@ -20,14 +23,24 @@ export interface SearchMetadata {
     status?: string;
     content_requested?: number;
     content_delivered?: number;
+    /** True when the empty result was confirmed (not an upstream failure). */
+    no_results_verified?: boolean;
+    /** Whether this no-results search was billed. */
+    charged?: boolean;
+    message?: string;
 }
 export interface SearchResponse {
     metadata: SearchMetadata;
     id: string;
     query: string;
-    /** Legacy field kept for compatibility — Serpex is a single engine. */
-    engines: string[];
+    /**
+     * @deprecated Always ["auto"] today and may be removed from responses in a
+     * later API version.
+     */
+    engines?: string[];
     results: SearchResult[];
+    /** Present only when no results were found. */
+    message?: string;
 }
 export interface ExtractResult {
     url: string;
@@ -54,7 +67,9 @@ export interface ExtractResult {
     /** Failure category, shared by normal and stealth extraction. */
     error_type?: string;
     status_code?: number;
+    /** @deprecated Never returned by the API; always undefined. Removed in 3.0. */
     crawled_at?: string;
+    /** @deprecated Never returned by the API; always undefined. Removed in 3.0. */
     extraction_mode?: string;
 }
 /** Machine-readable stealth failure codes — see ExtractResult.error_code. */
@@ -65,9 +80,12 @@ export interface ExtractMetadata {
     successful_crawls: number;
     failed_crawls: number;
     credits_used: number;
+    /** URLs served free as a same-workspace repeat (present only when > 0). */
     cached_free?: number;
     response_time: number;
     timestamp: string;
+    /** True when the request used stealth extraction. */
+    stealth?: boolean;
 }
 export interface ExtractResponse {
     success: boolean;
@@ -84,30 +102,49 @@ export interface SearchParams {
     include_content?: boolean;
     content_results?: 5 | 10;
     /**
-     * @deprecated Ignored by the API since 2026-06 — Serpex is a single search
-     * engine. Still accepted so existing code compiles; the SDK does not send it.
+     * @deprecated Ignored by the API since 2026-06. Still accepted so existing
+     * code compiles; the SDK does not send it and warns once.
      */
     engine?: string;
+    /**
+     * @deprecated Ignored by the API since 2026-06. Still accepted so existing
+     * code compiles; the SDK does not send it and warns once.
+     */
+    engines?: string | string[];
+}
+export interface SerpexClientOptions {
+    /**
+     * Timeout in milliseconds for every request. When omitted, each call uses a
+     * default sized above the server's own budget: 60 s search, 100 s search
+     * with include_content, 100 s extract, 120 s stealth extract.
+     */
+    timeoutMs?: number;
 }
 export interface UsageParams {
-    /** How many days of history to summarise (default: 30). */
+    /** How many days of history to summarise, 1-90 (default: 30; larger values are capped at 90). */
     days?: number;
 }
 export interface UsageStatistics {
     totalRequests: number;
     successfulRequests: number;
     failedRequests: number;
+    /** Zero-result searches (also counted in successfulRequests). */
+    noResultsRequests?: number;
     /** Requests per product over the period: `search`, `crawl`, `stealth` (only those used). */
     engineStats: Record<string, number>;
 }
 export interface UsageCredits {
-    /** Credits remaining on the workspace. */
+    /** Credits remaining for the whole organization. */
     balance: number;
     /** Credits consumed to date. */
     totalUsed?: number;
 }
+/** Usage statistics and credit balance for the organization that owns the API key. */
 export interface UsageResponse {
-    /** Name of the API key the request was made with. */
+    /**
+     * NAME of the API key the request was made with (not the key itself).
+     * Statistics and credits cover the whole organization, not only this key.
+     */
     api_key: string;
     organization_id: string;
     period_days: number;

@@ -24,7 +24,6 @@ import { SerpexClient } from "serpex";
 // Initialize the client with your API key
 const client = new SerpexClient("your-api-key-here");
 
-// One search engine — no engine to pick
 const results = await client.search({
   q: "typescript tutorial",
 });
@@ -39,11 +38,16 @@ console.log(results.results[0].title);
 #### Constructor
 
 ```typescript
-new SerpexClient(apiKey: string, baseUrl?: string)
+new SerpexClient(apiKey: string, baseUrl?: string, options?: { timeoutMs?: number })
 ```
 
 - `apiKey`: Your API key from the Serpex dashboard
 - `baseUrl`: Optional base URL (defaults to 'https://api.serpex.dev')
+- `options.timeoutMs`: Optional timeout for every request, in milliseconds. By default
+  each call gets its own: 60 s search, 100 s search with `include_content`, 100 s extract,
+  120 s stealth extract. A timeout throws `SerpApiException` with `details.error === "timeout"`.
+
+Every request sends `User-Agent: serpex-js/<version>` (browsers drop this header).
 
 #### Methods
 
@@ -149,6 +153,8 @@ for (const r of results) {
 ##### `usage(params?: UsageParams): Promise<UsageResponse>`
 
 Check your credit balance and request history — useful before a large batch.
+Counts and balance cover your **whole organization** (every API key in it), not only
+the key making the call. `api_key` in the response is the key's **name**, never the key.
 
 ```typescript
 const usage = await client.usage();          // last 30 days
@@ -168,7 +174,8 @@ interface UsageResponse {
     totalRequests: number;
     successfulRequests: number;
     failedRequests: number;
-    engineStats: Record<string, number>;
+    noResultsRequests?: number; // zero-result searches (also in successfulRequests)
+    engineStats: Record<string, number>; // per product: search, crawl, stealth
   };
   credits: { balance: number; totalUsed?: number };
   recent_requests?: Array<Record<string, any>>;
@@ -199,15 +206,21 @@ interface SearchParams {
 | `include_content` | `boolean` | `false` | Also fetch page content (markdown) for top results |
 | `content_results` | `5 \| 10` | `5` | How many top results to fetch content for; must be exactly `5` or `10` |
 
+With `include_content: true`, each of the top 5 or 10 results carries `content`
+(markdown) or, when that page could not be read, `content_error`. `metadata.content_requested`
+and `metadata.content_delivered` report how many were asked for and returned; credits depend
+on how many were delivered.
+
 
 ## The `engine` parameter (deprecated)
 
-Serpex is one search engine, so there is nothing to select. The legacy
-`engine` / `engines` request parameters are deprecated and ignored by the API
-(since 2026-06); requests that still send them get a `Deprecation` response
-header. `SearchParams.engine` is still accepted by the SDK so existing code
-keeps compiling, but it is not sent. The `engines` / `engine` response fields
-remain for compatibility.
+There is nothing to select. The legacy `engine` / `engines` request parameters
+are deprecated and ignored by the API (since 2026-06). `SearchParams.engine` and
+`SearchParams.engines` are still accepted by the SDK so existing code keeps
+compiling, but they are not sent, and the SDK logs one `console.warn` the first
+time you pass them (or any other option the API ignores). The `engines` /
+`results[].engine` response fields are deprecated too: always `"auto"` today
+and optional in the types, so do not rely on them.
 
 ## Response Format
 
@@ -219,20 +232,25 @@ interface SearchResponse {
     timestamp: string;
     credits_used: number;
     from_cache?: boolean;
-    status?: string;
+    status?: string; // "success" | "no_results"
     // Present only when include_content was requested
     content_requested?: number;
     content_delivered?: number;
+    // Present only when status is "no_results"
+    no_results_verified?: boolean;
+    charged?: boolean;
+    message?: string;
   };
   id: string;
   query: string;
-  engines: string[]; // legacy field, kept for compatibility
+  message?: string; // present only when no results were found
+  engines?: string[]; // deprecated: always ["auto"]
   results: Array<{
     title: string;
     url: string;
     snippet: string;
     position: number;
-    engine: string; // legacy field, kept for compatibility
+    engine?: string; // deprecated: always "auto"
     img_src?: string;
     duration?: string;
     score?: number;
