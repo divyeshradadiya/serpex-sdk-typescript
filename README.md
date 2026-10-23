@@ -84,13 +84,15 @@ interface SearchResponse {
   engines?: string[];               // deprecated: always ["auto"]
 }
 
-// content and content_error are mutually exclusive. Both exist only with
-// include_content: true, and only on the first content_results results.
-type SearchResult = SearchResultBase & (
-  | { content: string }              // page markdown
-  | { content_error: ContentErrorCode } // e.g. "robots_disallowed", "timeout", "blocked"
-  | {}                               // plain search, or beyond content_results
-);
+// content and content_error are mutually exclusive in responses. Both exist
+// only with include_content: true, and only on the first content_results results.
+interface SearchResult {
+  title: string; url: string; snippet: string; position: number;
+  content?: string;                  // page markdown
+  content_error?: ContentErrorCode;  // e.g. "robots_disallowed", "timeout", "blocked"
+  engine?: string;                   // deprecated: always "auto"
+  img_src?: string; duration?: string; score?: number;
+}
 ```
 
 A search that finds nothing returns HTTP 200 with `results: []` and `metadata.status:
@@ -133,7 +135,7 @@ interface ExtractParams {
 
 interface ExtractResponse {
   success: boolean;               // the request was processed; check each result
-  results: ExtractResult[];       // ExtractSuccess | ExtractFailure, narrow on `success`
+  results: ExtractResult[];       // check `success` per URL
   metadata: {
     total_urls: number;
     processed_urls: number;
@@ -147,17 +149,19 @@ interface ExtractResponse {
   };
 }
 
-interface ExtractSuccess { url: string; success: true; markdown?: string; html?: string; status_code?: number }
-interface ExtractFailure {
+interface ExtractResult {
   url: string;
-  success: false;
-  error: string;                  // e.g. "HTTP 404: Not Found"
-  error_type: ExtractErrorType;   // timeout, connection, dns_unresolved, ssl_error, http, blocked,
-                                  // robots_disallowed, server_error, unsupported_content_type,
-                                  // too_large, unknown
+  success: boolean;
+  markdown?: string;              // success, format "markdown" ("" on a failure)
+  html?: string;                  // success, format "html"
   status_code?: number;
-  error_code?: StealthErrorCode;  // stealth only
+  error?: string;                 // failure: e.g. "HTTP 404: Not Found"
+  error_type?: ExtractErrorType;  // failure (always set then): timeout, connection, dns_unresolved,
+                                  // ssl_error, http, blocked, robots_disallowed, server_error,
+                                  // unsupported_content_type, too_large, unknown
+  error_code?: StealthErrorCode;  // stealth failures only
 }
+// ExtractSuccess / ExtractFailure are exported too: the exact shape of each case.
 ```
 
 ```typescript
@@ -212,7 +216,7 @@ interface UsageResponse {
     engineStats: { search?: number; crawl?: number; stealth?: number };
   };
   credits: { balance: number; totalUsed?: number };
-  recent_requests?: UsageRecentRequest[]; // 10 newest; no query text
+  recent_requests?: Array<UsageRecentRequest & Record<string, any>>; // 10 newest; no query text
 }
 ```
 
@@ -238,6 +242,10 @@ Every API error is thrown as `SerpApiException`:
 | 410 | stealth after 2026-11-01 | no |
 | 429 | over your per-second limit: 5, 25 or 50 requests/s by plan (`details.limit`) | yes, after `retryAfterMs` |
 | 500 / 502 / 503 / 504 | our side, never charged | yes |
+
+Network failures (DNS, connection reset, TLS) also throw `SerpApiException` since 2.12.0, with
+`details.error === "network"` and the original error in `cause`; before, they rejected with the
+runtime's raw `TypeError`. A timeout has `details.error === "timeout"`.
 
 A search with page content counts as more than one request toward the rate limit: 2 with
 `content_results: 5`, 3 with `content_results: 10`.

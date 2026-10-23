@@ -4,7 +4,7 @@ exports.SerpexClient = exports.SerpApiException = exports.STEALTH_EXTRACT_TIMEOU
 const types_1 = require("./types");
 Object.defineProperty(exports, "SerpApiException", { enumerable: true, get: function () { return types_1.SerpApiException; } });
 /** SDK version, sent in the User-Agent header. Keep in step with package.json. */
-exports.VERSION = "2.11.1";
+exports.VERSION = "2.12.0";
 /** Stealth mode ends at this instant; from then the API answers `stealth: true` with HTTP 410. */
 exports.STEALTH_END_DATE = "2026-11-01T00:00:00Z";
 // One stealth sunset warning per process, not one per call.

@@ -30,22 +30,19 @@ export interface SearchResultBase {
 /**
  * One search result.
  *
- * `content` and `content_error` are mutually exclusive and exist only on
- * requests with `include_content: true`, and only on the first
+ * `content` and `content_error` are mutually exclusive in API responses and
+ * exist only on requests with `include_content: true`, and only on the first
  * `content_results` results: a successful page fetch sets `content`
  * (markdown), a failed one sets `content_error`. Every other result has
- * neither key.
+ * neither key. (Both stay optional on this interface for backward
+ * compatibility; check `content !== undefined` first.)
  */
-export type SearchResult = SearchResultBase & ({
-    content: string;
-    content_error?: never;
-} | {
-    content_error: ContentErrorCode;
-    content?: never;
-} | {
-    content?: never;
-    content_error?: never;
-});
+export interface SearchResult extends SearchResultBase {
+    /** Page content as markdown (include_content only, successful fetch). Never together with `content_error`. */
+    content?: string;
+    /** Why page content is missing (include_content only, failed fetch). Never together with `content`. */
+    content_error?: ContentErrorCode;
+}
 export interface SearchMetadata {
     /** Number of results in `results`. */
     number_of_results: number;
@@ -61,7 +58,8 @@ export interface SearchMetadata {
     credits_used: number;
     /** True when served from the content cache (informational, not a billing flag). */
     from_cache?: boolean;
-    status?: SearchStatus;
+    /** "success" or "no_results" (other strings are reserved for future outcomes). */
+    status?: SearchStatus | (string & {});
     /** Present only with `include_content: true`: the requested tier (5 or 10). */
     content_requested?: number;
     /** Present only with `include_content: true`: results that came back with content. */
@@ -132,8 +130,24 @@ export interface ExtractFailure extends ExtractResultBase {
     /** Stable code, stealth extractions only. */
     error_code?: StealthErrorCode | (string & {});
 }
-/** One extracted URL: narrow on `success`. */
-export type ExtractResult = ExtractSuccess | ExtractFailure;
+/**
+ * One extracted URL. On success it carries `markdown` (or `html`); on
+ * failure it always carries `error` and `error_type` and is never charged.
+ * `ExtractSuccess` / `ExtractFailure` describe the two cases exactly.
+ */
+export interface ExtractResult extends ExtractResultBase {
+    success: boolean;
+    /** format "markdown" (default); "" on a failure. */
+    markdown?: string;
+    /** format "html". */
+    html?: string;
+    /** Failure only: human-readable reason, e.g. "HTTP 404: Not Found". */
+    error?: string;
+    /** Failure only (always set then): failure category, shared by normal and stealth extraction. */
+    error_type?: ExtractErrorType;
+    /** Failure only, stealth extractions only: a stable code. */
+    error_code?: StealthErrorCode | (string & {});
+}
 export interface ExtractMetadata {
     total_urls: number;
     processed_urls: number;
@@ -218,27 +232,31 @@ export interface UsageCredits {
     /** Credits consumed to date. */
     totalUsed?: number;
 }
-/** One of the 10 most recent requests in `UsageResponse.recent_requests`. */
+/**
+ * One of the 10 most recent requests in `UsageResponse.recent_requests`.
+ * The API always sends every field; they are optional here so hand-built
+ * objects written for earlier versions keep compiling.
+ */
 export interface UsageRecentRequest {
-    id: number;
-    organizationId: string | null;
+    id?: number;
+    organizationId?: string | null;
     /** Product that served the request. */
-    searchEngine: "search" | "crawl" | "stealth" | (string & {});
+    searchEngine?: "search" | "crawl" | "stealth" | (string & {});
     /** "auto" for searches, "crawl" or "stealth" for extract requests; null on older records. */
-    requestedEngine: string | null;
+    requestedEngine?: string | null;
     /** Results returned (search) or URLs submitted (extract). */
-    resultsCount: number | null;
-    status: "success" | "no_results" | "error" | (string & {});
+    resultsCount?: number | null;
+    status?: "success" | "no_results" | "error" | (string & {});
     /** Milliseconds. */
-    responseTime: number | null;
-    fromCache: boolean;
-    contentRequested: boolean;
+    responseTime?: number | null;
+    fromCache?: boolean;
+    contentRequested?: boolean;
     /** 5 or 10; null when page content was not requested. */
-    contentPagesRequested: number | null;
+    contentPagesRequested?: number | null;
     /** null when page content was not requested. */
-    contentPagesDelivered: number | null;
+    contentPagesDelivered?: number | null;
     /** ISO 8601. */
-    createdAt: string | null;
+    createdAt?: string | null;
 }
 /** Usage statistics and credit balance for the organization that owns the API key. */
 export interface UsageResponse {
@@ -258,7 +276,7 @@ export interface UsageResponse {
     statistics: UsageStatistics;
     credits: UsageCredits;
     /** The 10 most recent requests in the period, newest first. */
-    recent_requests?: UsageRecentRequest[];
+    recent_requests?: Array<UsageRecentRequest & Record<string, any>>;
 }
 /**
  * Error body returned by the API. Every field except `error` depends on the
@@ -271,11 +289,13 @@ export interface UsageResponse {
  * - 503 (search): `status: "error"` and `metadata`
  */
 export interface SerpApiError {
-    /** A string on every Serpex error; an object `{ message, status }` from the framework error handler (e.g. malformed JSON). */
-    error: string | {
-        message: string;
-        status: number;
-    };
+    /**
+     * The error text. Typed `string` for backward compatibility; the framework
+     * error handler (e.g. malformed JSON) sends `{ message, status }` here
+     * instead, see `SerpApiErrorBody`. `SerpApiException.message` is always
+     * the readable text either way.
+     */
+    error: string;
     /** Present on framework 404 bodies. */
     message?: string;
     statusCode?: number;
@@ -301,6 +321,13 @@ export interface SerpApiError {
     /** @deprecated Never returned by the API; use `retryAfterMs`. */
     retryAfter?: number;
 }
+/** The error body exactly as it can arrive, including the framework's object-shaped `error`. */
+export type SerpApiErrorBody = Omit<SerpApiError, "error"> & {
+    error: string | {
+        message: string;
+        status: number;
+    };
+};
 /** Human-readable message for an error body, never "[object Object]". */
 export declare function errorMessageFrom(body: unknown, status?: number): string;
 export declare class SerpApiException extends Error {

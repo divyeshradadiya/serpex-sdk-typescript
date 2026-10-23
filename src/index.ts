@@ -26,10 +26,11 @@ export type {
   UsageCredits,
   UsageRecentRequest,
   SerpApiError,
+  SerpApiErrorBody,
 } from "./types";
 
 /** SDK version, sent in the User-Agent header. Keep in step with package.json. */
-export const VERSION = "2.11.1";
+export const VERSION = "2.12.0";
 
 /** Stealth mode ends at this instant; from then the API answers `stealth: true` with HTTP 410. */
 export const STEALTH_END_DATE = "2026-11-01T00:00:00Z";

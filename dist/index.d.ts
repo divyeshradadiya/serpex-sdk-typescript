@@ -1,7 +1,7 @@
 import { SearchResponse, SearchParams, ExtractResponse, ExtractParams, UsageParams, UsageResponse, StealthErrorCode, SerpApiException, SerpexClientOptions } from "./types";
-export type { SearchStatus, SearchResult, SearchResultBase, SearchMetadata, ContentErrorCode, ExtractResult, ExtractSuccess, ExtractFailure, ExtractErrorType, ExtractMetadata, UsageStatistics, UsageCredits, UsageRecentRequest, SerpApiError, } from "./types";
+export type { SearchStatus, SearchResult, SearchResultBase, SearchMetadata, ContentErrorCode, ExtractResult, ExtractSuccess, ExtractFailure, ExtractErrorType, ExtractMetadata, UsageStatistics, UsageCredits, UsageRecentRequest, SerpApiError, SerpApiErrorBody, } from "./types";
 /** SDK version, sent in the User-Agent header. Keep in step with package.json. */
-export declare const VERSION = "2.11.1";
+export declare const VERSION = "2.12.0";
 /** Stealth mode ends at this instant; from then the API answers `stealth: true` with HTTP 410. */
 export declare const STEALTH_END_DATE = "2026-11-01T00:00:00Z";
 export declare const SEARCH_TIMEOUT_MS = 60000;

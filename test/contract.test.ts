@@ -119,11 +119,11 @@ describe("search", () => {
     expect(res.message).toBe(res.metadata.message);
   });
 
-  it("content and content_error cannot both be set (type level)", () => {
-    // @ts-expect-error — mutually exclusive
-    const bad: SearchResult = { title: "t", url: "u", snippet: "s", position: 1, content: "c", content_error: "timeout" };
-    const ok: SearchResult = { title: "t", url: "u", snippet: "s", position: 1, content_error: "timeout" };
-    expect(bad && ok).toBeTruthy();
+  it("no recorded result carries both content and content_error", () => {
+    for (const name of ["search_plain", "search_content", "search_content_errors", "search_no_results"]) {
+      const results: SearchResult[] = fixture(name).results;
+      expect(results.filter((r) => r.content !== undefined && r.content_error !== undefined)).toEqual([]);
+    }
   });
 });
 
