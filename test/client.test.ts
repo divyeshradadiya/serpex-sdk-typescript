@@ -44,8 +44,8 @@ describe("SerpexClient.search", () => {
     const calls = stubFetch();
     const client = new SerpexClient("test-key", "https://example.invalid");
     await client.search({ q: "hello" });
-    expect(VERSION).toBe("2.11.0");
-    expect(calls[0].init.headers["User-Agent"]).toBe("serpex-js/2.11.0");
+    expect(VERSION).toBe("2.11.1");
+    expect(calls[0].init.headers["User-Agent"]).toBe("serpex-js/2.11.1");
   });
 
   it("parses a response without the deprecated engine fields", async () => {
@@ -78,6 +78,13 @@ describe("SerpexClient.search", () => {
       name: "SerpApiException",
       details: { error: "timeout", timeoutMs: 10 },
     });
+  });
+
+  it("appends an integration's product token to the User-Agent", async () => {
+    const calls = stubFetch();
+    const client = new SerpexClient("test-key", "https://example.invalid", { userAgent: " my-agent/1.4.0 " });
+    await client.search({ q: "hello" });
+    expect(calls[0].init.headers["User-Agent"]).toBe("serpex-js/2.11.1 my-agent/1.4.0");
   });
 
   it("rejects a non-positive timeout override", () => {

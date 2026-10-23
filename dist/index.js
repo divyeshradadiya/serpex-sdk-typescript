@@ -1,10 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SerpexClient = exports.SerpApiException = exports.STEALTH_EXTRACT_TIMEOUT_MS = exports.EXTRACT_TIMEOUT_MS = exports.SEARCH_CONTENT_TIMEOUT_MS = exports.SEARCH_TIMEOUT_MS = exports.VERSION = void 0;
+exports.SerpexClient = exports.SerpApiException = exports.STEALTH_EXTRACT_TIMEOUT_MS = exports.EXTRACT_TIMEOUT_MS = exports.SEARCH_CONTENT_TIMEOUT_MS = exports.SEARCH_TIMEOUT_MS = exports.STEALTH_END_DATE = exports.VERSION = void 0;
 const types_1 = require("./types");
 Object.defineProperty(exports, "SerpApiException", { enumerable: true, get: function () { return types_1.SerpApiException; } });
 /** SDK version, sent in the User-Agent header. Keep in step with package.json. */
-exports.VERSION = "2.11.0";
+exports.VERSION = "2.11.1";
+/** Stealth mode ends at this instant; from then the API answers `stealth: true` with HTTP 410. */
+exports.STEALTH_END_DATE = "2026-11-01T00:00:00Z";
+// One stealth sunset warning per process, not one per call.
+let warnedStealthSunset = false;
+/** Retry-After header (seconds) as milliseconds, when present and numeric. */
+function retryAfterHeaderMs(response) {
+    const raw = response.headers?.get?.("retry-after");
+    if (!raw)
+        return undefined;
+    const seconds = Number(raw);
+    return Number.isFinite(seconds) && seconds >= 0 ? seconds * 1000 : undefined;
+}
 // Client-side timeouts (ms). Each is longer than the server's own budget for
 // that request, so the client never gives up on a request the server still
 // finishes and bills: plain search 30 s upstream, search with include_content
@@ -39,6 +51,8 @@ class SerpexClient {
         this.apiKey = apiKey;
         this.baseUrl = baseUrl.replace(/\/$/, ""); // Remove trailing slash
         this.timeoutMs = options.timeoutMs;
+        const extra = typeof options.userAgent === "string" ? options.userAgent.trim() : "";
+        this.userAgent = extra ? `serpex-js/${exports.VERSION} ${extra}` : `serpex-js/${exports.VERSION}`;
     }
     /**
      * Make an authenticated request to the API
@@ -50,7 +64,7 @@ class SerpexClient {
             Authorization: `Bearer ${this.apiKey}`,
             "Content-Type": "application/json",
             // Browsers ignore this header; Node and other server runtimes send it.
-            "User-Agent": `serpex-js/${exports.VERSION}`,
+            "User-Agent": this.userAgent,
         };
         const timeout = this.timeoutMs ?? timeoutMs;
         let finalUrl = url;
@@ -93,19 +107,22 @@ class SerpexClient {
                 catch (e) {
                     if (controller.signal.aborted)
                         throw e;
-                    // If we can't parse the error response, use the status text
-                    errorData = { error: response.statusText };
+                    // Not JSON (e.g. a CDN error page): keep the status text, if any.
+                    errorData = { error: response.statusText || `HTTP ${response.status}` };
                 }
-                throw new types_1.SerpApiException(errorData.error || "API request failed", response.status, errorData);
+                throw new types_1.SerpApiException((0, types_1.errorMessageFrom)(errorData, response.status), response.status, errorData, { retryAfterMs: retryAfterHeaderMs(response) });
             }
             // Read the body inside the timer too: a stalled body is a timeout.
             return await response.json();
         }
         catch (e) {
-            if (controller.signal.aborted && !(e instanceof types_1.SerpApiException)) {
-                throw new types_1.SerpApiException(`Request timed out after ${timeout / 1000} s`, undefined, { error: "timeout", timeoutMs: timeout });
+            if (e instanceof types_1.SerpApiException)
+                throw e;
+            if (controller.signal.aborted) {
+                throw new types_1.SerpApiException(`Request timed out after ${timeout / 1000} s`, undefined, { error: "timeout", timeoutMs: timeout }, { retryable: true, cause: e });
             }
-            throw e;
+            // DNS, connection reset, TLS: nothing reached the API, safe to retry.
+            throw new types_1.SerpApiException(`Network error: ${e instanceof Error ? e.message : String(e)}`, undefined, { error: "network" }, { retryable: true, cause: e });
         }
         finally {
             clearTimeout(timer);
@@ -159,7 +176,12 @@ class SerpexClient {
         return this.makeRequest("/api/search", requestParams, "GET", params.include_content ? exports.SEARCH_CONTENT_TIMEOUT_MS : exports.SEARCH_TIMEOUT_MS);
     }
     /**
-     * Extract page content (markdown or HTML) from up to 10 URLs
+     * Extract page content (markdown or HTML) from 1 to 10 URLs.
+     *
+     * Each URL succeeds or fails on its own: narrow `results[i]` on `success`.
+     * Failed URLs carry `error` and `error_type` and are never charged.
+     * `stealth: true` is deprecated: stealth mode ends on 2026-11-01, after which
+     * the API answers it with HTTP 410.
      * @param params - Extraction parameters including the URLs to extract
      * @returns Extraction results
      */
@@ -191,6 +213,12 @@ class SerpexClient {
         };
         if (params.stealth !== undefined) {
             requestParams.stealth = params.stealth;
+            if (params.stealth === true && !warnedStealthSunset) {
+                warnedStealthSunset = true;
+                console.warn("[serpex] Deprecated: stealth mode ends on 2026-11-01. From that date " +
+                    "extract({ stealth: true }) is rejected with HTTP 410 (not charged). " +
+                    "Send the request without stealth.");
+            }
         }
         if (params.format !== undefined) {
             requestParams.format = params.format;

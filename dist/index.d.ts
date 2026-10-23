@@ -1,6 +1,9 @@
 import { SearchResponse, SearchParams, ExtractResponse, ExtractParams, UsageParams, UsageResponse, StealthErrorCode, SerpApiException, SerpexClientOptions } from "./types";
+export type { SearchStatus, SearchResult, SearchResultBase, SearchMetadata, ContentErrorCode, ExtractResult, ExtractSuccess, ExtractFailure, ExtractErrorType, ExtractMetadata, UsageStatistics, UsageCredits, UsageRecentRequest, SerpApiError, } from "./types";
 /** SDK version, sent in the User-Agent header. Keep in step with package.json. */
-export declare const VERSION = "2.11.0";
+export declare const VERSION = "2.11.1";
+/** Stealth mode ends at this instant; from then the API answers `stealth: true` with HTTP 410. */
+export declare const STEALTH_END_DATE = "2026-11-01T00:00:00Z";
 export declare const SEARCH_TIMEOUT_MS = 60000;
 export declare const SEARCH_CONTENT_TIMEOUT_MS = 100000;
 export declare const EXTRACT_TIMEOUT_MS = 100000;
@@ -10,6 +13,7 @@ export declare class SerpexClient {
     private baseUrl;
     private apiKey;
     private timeoutMs?;
+    private userAgent;
     /**
      * Create a new SerpexClient instance
      * @param apiKey - Your API key from the Serpex dashboard
@@ -37,7 +41,12 @@ export declare class SerpexClient {
      */
     search(params: SearchParams): Promise<SearchResponse>;
     /**
-     * Extract page content (markdown or HTML) from up to 10 URLs
+     * Extract page content (markdown or HTML) from 1 to 10 URLs.
+     *
+     * Each URL succeeds or fails on its own: narrow `results[i]` on `success`.
+     * Failed URLs carry `error` and `error_type` and are never charged.
+     * `stealth: true` is deprecated: stealth mode ends on 2026-11-01, after which
+     * the API answers it with HTTP 410.
      * @param params - Extraction parameters including the URLs to extract
      * @returns Extraction results
      */
