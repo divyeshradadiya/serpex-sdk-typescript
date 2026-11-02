@@ -1,14 +1,11 @@
-import { SearchResponse, SearchParams, ExtractResponse, ExtractParams, UsageParams, UsageResponse, StealthErrorCode, SerpApiException, SerpexClientOptions } from "./types";
+import { SearchResponse, SearchParams, ExtractResponse, ExtractParams, UsageParams, UsageResponse, SerpApiException, SerpexClientOptions } from "./types";
 export type { SearchStatus, SearchResult, SearchResultBase, SearchMetadata, ContentErrorCode, ExtractResult, ExtractSuccess, ExtractFailure, ExtractErrorType, ExtractMetadata, UsageStatistics, UsageCredits, UsageRecentRequest, SerpApiError, SerpApiErrorBody, } from "./types";
 /** SDK version, sent in the User-Agent header. Keep in step with package.json. */
-export declare const VERSION = "2.12.0";
-/** Stealth mode ends at this instant; from then the API answers `stealth: true` with HTTP 410. */
-export declare const STEALTH_END_DATE = "2026-11-01T00:00:00Z";
+export declare const VERSION = "2.13.0";
 export declare const SEARCH_TIMEOUT_MS = 60000;
 export declare const SEARCH_CONTENT_TIMEOUT_MS = 100000;
 export declare const EXTRACT_TIMEOUT_MS = 100000;
-export declare const STEALTH_EXTRACT_TIMEOUT_MS = 120000;
-export { SearchResponse, SearchParams, ExtractResponse, ExtractParams, UsageParams, UsageResponse, StealthErrorCode, SerpApiException, SerpexClientOptions, };
+export { SearchResponse, SearchParams, ExtractResponse, ExtractParams, UsageParams, UsageResponse, SerpApiException, SerpexClientOptions, };
 export declare class SerpexClient {
     private baseUrl;
     private apiKey;
@@ -21,7 +18,7 @@ export declare class SerpexClient {
      * @param options - Optional. `timeoutMs` overrides the per-call timeout for
      *   every request. When omitted, each call uses a default sized above the
      *   server's own budget: 60 s search, 100 s search with include_content,
-     *   100 s extract, 120 s stealth extract.
+     *   100 s extract.
      */
     constructor(apiKey: string, baseUrl?: string, options?: SerpexClientOptions);
     /**
@@ -45,8 +42,6 @@ export declare class SerpexClient {
      *
      * Each URL succeeds or fails on its own: narrow `results[i]` on `success`.
      * Failed URLs carry `error` and `error_type` and are never charged.
-     * `stealth: true` is deprecated: stealth mode ends on 2026-11-01, after which
-     * the API answers it with HTTP 410.
      * @param params - Extraction parameters including the URLs to extract
      * @returns Extraction results
      */
