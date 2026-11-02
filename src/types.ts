@@ -117,34 +117,17 @@ export type ExtractErrorType =
   | "unknown"
   | (string & {});
 
-/**
- * Machine-readable stealth failure codes — see ExtractFailure.error_code.
- * The API does not return codes that name its rendering service, so
- * "stealth_provider_unavailable" never reaches you; it stays listed for
- * existing code. Such a failure carries `error_type: "server_error"`.
- */
-export type StealthErrorCode =
-  | "stealth_target_unreachable"
-  | "stealth_target_status"
-  | "stealth_target_empty"
-  | "stealth_timeout"
-  | "stealth_provider_unavailable"
-  | "stealth_network"
-  | "stealth_unconfigured";
-
 interface ExtractResultBase {
   url: string;
   /** HTTP status of the target page, when known. */
   status_code?: number;
-  /** Present (always true) only on `stealth: true` requests. */
-  stealth?: boolean;
   /** @deprecated Never returned by the API; always undefined. Removed in 3.0. */
   crawled_at?: string;
   /** @deprecated Never returned by the API; always undefined. Removed in 3.0. */
   extraction_mode?: string;
 }
 
-/** A URL that was extracted. Charged (1 credit, or 5 in stealth mode) unless a free repeat. */
+/** A URL that was extracted. Charged (1 credit) unless a free repeat. */
 export interface ExtractSuccess extends ExtractResultBase {
   success: true;
   /** Present when `format` is "markdown" (default). */
@@ -153,7 +136,6 @@ export interface ExtractSuccess extends ExtractResultBase {
   html?: string;
   error?: never;
   error_type?: never;
-  error_code?: never;
 }
 
 /** A URL that could not be extracted. Never charged. */
@@ -164,10 +146,8 @@ export interface ExtractFailure extends ExtractResultBase {
   html?: never;
   /** Human-readable failure reason, e.g. "HTTP 404: Not Found". */
   error: string;
-  /** Failure category, shared by normal and stealth extraction. Branch on this. */
+  /** Failure category, Branch on this. */
   error_type: ExtractErrorType;
-  /** Stable code, stealth extractions only. */
-  error_code?: StealthErrorCode | (string & {});
 }
 
 /**
@@ -183,10 +163,8 @@ export interface ExtractResult extends ExtractResultBase {
   html?: string;
   /** Failure only: human-readable reason, e.g. "HTTP 404: Not Found". */
   error?: string;
-  /** Failure only (always set then): failure category, shared by normal and stealth extraction. */
+  /** Failure only (always set then): failure category. */
   error_type?: ExtractErrorType;
-  /** Failure only, stealth extractions only: a stable code. */
-  error_code?: StealthErrorCode | (string & {});
 }
 
 export interface ExtractMetadata {
@@ -199,8 +177,6 @@ export interface ExtractMetadata {
   cached_free?: number;
   response_time: number;
   timestamp: string;
-  /** Present (always true) only on `stealth: true` requests. */
-  stealth?: boolean;
 }
 
 export interface ExtractResponse {
@@ -213,13 +189,6 @@ export interface ExtractResponse {
 export interface ExtractParams {
   /** URLs to extract: 1 to 10 absolute URLs. */
   urls: string[];
-
-  /**
-   * @deprecated Stealth mode ends on 2026-11-01. From that date the API rejects
-   * `stealth: true` with HTTP 410 (thrown as SerpApiException, not charged).
-   * Until then it renders the page in a full browser for 5 credits per URL.
-   */
-  stealth?: boolean;
 
   /** Output format: "markdown" (default) or "html". */
   format?: "markdown" | "html";
@@ -253,7 +222,7 @@ export interface SerpexClientOptions {
   /**
    * Timeout in milliseconds for every request. When omitted, each call uses a
    * default sized above the server's own budget: 60 s search, 100 s search
-   * with include_content, 100 s extract, 120 s stealth extract.
+   * with include_content, 100 s extract.
    */
   timeoutMs?: number;
   /**
@@ -276,8 +245,8 @@ export interface UsageStatistics {
   failedRequests: number;
   /** Zero-result searches (also counted in successfulRequests). */
   noResultsRequests?: number;
-  /** Requests per product over the period: `search`, `crawl`, `stealth` (only keys with a count above 0). */
-  engineStats: Partial<Record<"search" | "crawl" | "stealth", number>> & Record<string, number>;
+  /** Requests per product over the period: `search`, `crawl` (only keys with a count above 0). */
+  engineStats: Partial<Record<"search" | "crawl", number>> & Record<string, number>;
 }
 
 export interface UsageCredits {
@@ -296,8 +265,8 @@ export interface UsageRecentRequest {
   id?: number;
   organizationId?: string | null;
   /** Product that served the request. */
-  searchEngine?: "search" | "crawl" | "stealth" | (string & {});
-  /** "auto" for searches, "crawl" or "stealth" for extract requests; null on older records. */
+  searchEngine?: "search" | "crawl" | (string & {});
+  /** "auto" for searches, "crawl" for extract requests; null on older records. */
   requestedEngine?: string | null;
   /** Results returned (search) or URLs submitted (extract). */
   resultsCount?: number | null;

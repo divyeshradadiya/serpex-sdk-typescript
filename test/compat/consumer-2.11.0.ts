@@ -13,7 +13,6 @@ import {
   UsageParams,
   UsageResponse,
   SerpexClientOptions,
-  StealthErrorCode,
 } from "serpex";
 
 type SearchResult = SearchResponse["results"][number];
@@ -108,16 +107,16 @@ function render(r: SearchResult): string {
   return `${r.position}. ${r.title} ${r.url} ${body}`;
 }
 function extractText(r: ExtractResult): string {
-  if (!r.success) return `${r.error_type?.toUpperCase()}: ${r.error ?? ""} ${r.error_code ?? ""}`;
+  if (!r.success) return `${r.error_type?.toUpperCase()}: ${r.error ?? ""}`;
   return r.markdown ?? r.html ?? "";
 }
-const code: StealthErrorCode = "stealth_timeout";
+// The stealth option and its error codes ended 1 Nov 2026 and are removed in 2.13.0.
 
 async function main(): Promise<void> {
   const options: SerpexClientOptions = { timeoutMs: 30_000 };
   const client = new SerpexClient("sk_test", "https://api.serpex.dev", options);
   const params: SearchParams = { q: "q", include_content: true, content_results: 5, engine: "auto" };
-  const extractParams: ExtractParams = { urls: ["https://example.com"], format: "markdown", stealth: false };
+  const extractParams: ExtractParams = { urls: ["https://example.com"], format: "markdown" };
   const usageParams: UsageParams = { days: 7 };
   try {
     const res = await client.search(params);
@@ -138,4 +137,4 @@ async function main(): Promise<void> {
   void manual;
 }
 
-void [statusText, failed, search, extract, searches, lastQuery, lastStatus, code, main];
+void [statusText, failed, search, extract, searches, lastQuery, lastStatus, main];

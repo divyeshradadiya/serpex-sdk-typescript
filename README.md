@@ -40,8 +40,7 @@ new SerpexClient(apiKey: string, baseUrl?: string, options?: { timeoutMs?: numbe
 - `apiKey`: your API key from the Serpex dashboard.
 - `baseUrl`: optional, defaults to `https://api.serpex.dev`.
 - `options.timeoutMs`: optional timeout for every request, in milliseconds. By default each
-  call gets its own: 60 s search, 100 s search with `include_content`, 100 s extract, 120 s
-  stealth extract. A timeout throws `SerpApiException` with `details.error === "timeout"`.
+  call gets its own: 60 s search, 100 s search with `include_content`, 100 s extract. A timeout throws `SerpApiException` with `details.error === "timeout"`.
 
 - `options.userAgent`: optional product token appended to the User-Agent, e.g. `"my-agent/1.4.0"`.
 
@@ -129,8 +128,6 @@ failed URLs are never charged.
 interface ExtractParams {
   urls: string[];                 // 1-10 absolute URLs
   format?: "markdown" | "html";   // default "markdown"
-  /** @deprecated stealth mode ends on 2026-11-01 (HTTP 410 from then) */
-  stealth?: boolean;
 }
 
 interface ExtractResponse {
@@ -143,7 +140,6 @@ interface ExtractResponse {
     failed_crawls: number;
     credits_used: number;
     cached_free?: number;         // free repeats; omitted when 0
-    stealth?: boolean;            // stealth requests only
     response_time: number;
     timestamp: string;
   };
@@ -159,7 +155,6 @@ interface ExtractResult {
   error_type?: ExtractErrorType;  // failure (always set then): timeout, connection, dns_unresolved,
                                   // ssl_error, http, blocked, robots_disallowed, server_error,
                                   // unsupported_content_type, too_large, unknown
-  error_code?: StealthErrorCode;  // stealth failures only
 }
 // ExtractSuccess / ExtractFailure are exported too: the exact shape of each case.
 ```
@@ -176,18 +171,6 @@ for (const r of results) {
 console.log(`credits used: ${metadata.credits_used}`);
 ```
 
-#### Stealth mode (ends 2026-11-01)
-
-`stealth: true` renders the page in a full browser for 5 credits per URL. **It ends on
-2026-11-01.** From that date the API rejects it with HTTP 410 (not charged); send the request
-without `stealth`. The SDK logs one `console.warn` per process when you use it.
-
-A failed stealth result says `"This page could not be rendered. Not charged."` and may carry an
-`error_code`: `stealth_target_unreachable` (domain gone), `stealth_target_status` (error status,
-see `status_code`), `stealth_target_empty`, `stealth_timeout`, `stealth_network`,
-`stealth_unconfigured`. Failures on our side carry `error_type: "server_error"` without a code
-(`stealth_provider_unavailable` is never returned).
-
 ### `usage(params?: UsageParams): Promise<UsageResponse>`
 
 Credit balance and request counts for your **whole organization** (every API key in it).
@@ -199,7 +182,7 @@ const usage = await client.usage();             // last 30 days
 const week = await client.usage({ days: 7 });  // 1-90
 
 console.log(usage.credits.balance);
-console.log(usage.statistics.engineStats);      // { search: 120, crawl: 30, stealth: 5 }
+console.log(usage.statistics.engineStats);      // { search: 120, crawl: 30 }
 ```
 
 ```typescript
@@ -213,7 +196,7 @@ interface UsageResponse {
     successfulRequests: number; // includes no_results
     failedRequests: number;
     noResultsRequests?: number;
-    engineStats: { search?: number; crawl?: number; stealth?: number };
+    engineStats: { search?: number; crawl?: number };
   };
   credits: { balance: number; totalUsed?: number };
   recent_requests?: Array<UsageRecentRequest & Record<string, any>>; // 10 newest; no query text
@@ -238,8 +221,6 @@ Every API error is thrown as `SerpApiException`:
 | 400 | missing or invalid `q`, `include_content`, `content_results`, `urls` or `days` | no |
 | 401 | missing or invalid API key | no |
 | 402 | insufficient credits (`details.remainingCredits`) | no |
-| 403 | stealth not included in your plan | no |
-| 410 | stealth after 2026-11-01 | no |
 | 429 | over your per-second limit: 5, 25 or 50 requests/s by plan (`details.limit`) | yes, after `retryAfterMs` |
 | 500 / 502 / 503 / 504 | our side, never charged | yes |
 
