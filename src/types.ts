@@ -146,7 +146,7 @@ export interface ExtractFailure extends ExtractResultBase {
   html?: never;
   /** Human-readable failure reason, e.g. "HTTP 404: Not Found". */
   error: string;
-  /** Failure category, Branch on this. */
+  /** Failure category. Branch on this. */
   error_type: ExtractErrorType;
 }
 
