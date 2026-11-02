@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.13.0 — 2026-11-02
+
+- Removed the `stealth` option. It ended 1 Nov 2026; the API answers 410 to older versions that send it.
+
 ## 2.12.0 — 2026-10-23
 
 Types and errors now match the API exactly (checked against the backend and live responses). Minor release: one behaviour change (network errors), otherwise additive; code written for 2.11.0 keeps compiling (`npm run typecheck:compat` checks a 2.11.0 consumer).

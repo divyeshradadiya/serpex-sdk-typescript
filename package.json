@@ -1,6 +1,6 @@
 {
   "name": "serpex",
-  "version": "2.12.0",
+  "version": "2.13.0",
   "description": "Official TypeScript SDK for Serpex \u2014 web search API and extract API for AI agents: ranked web results, optionally with page content as markdown",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

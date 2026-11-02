@@ -161,17 +161,15 @@ describe("extract", () => {
     expect(res.metadata).toMatchObject({ successful_crawls: 0, failed_crawls: 1, credits_used: 0 });
   });
 
-  it("stealth: sent, warned once (ends 2026-11-01), 5 credits", async () => {
-    const calls = serve("extract_stealth");
-    const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
-    const c = client();
-    const res = await c.extract({ urls: ["https://example.com"], stealth: true });
-    await c.extract({ urls: ["https://example.com"], stealth: true });
-    expect(JSON.parse(calls[0].init.body).stealth).toBe(true);
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn.mock.calls[0][0]).toContain("2026-11-01");
-    expect(res.metadata).toMatchObject({ stealth: true, credits_used: 5 });
-    expect(res.results[0].stealth).toBe(true);
+  it("request body carries only urls and format, never a stealth key", async () => {
+    const calls = serve("extract_markdown");
+    await client().extract({ urls: ["https://example.com"], format: "html" });
+    const body = JSON.parse(calls[0].init.body);
+    expect(Object.keys(body).sort()).toEqual(["format", "urls"]);
+    expect(body).not.toHaveProperty("stealth");
+    // a caller passing the removed option from untyped code is not forwarded either
+    await client().extract({ urls: ["https://example.com"], stealth: true } as any);
+    expect(JSON.parse(calls[1].init.body)).not.toHaveProperty("stealth");
   });
 });
 
@@ -183,11 +181,11 @@ describe("usage", () => {
     expect(res.period_days).toBe(7);
     expect(res.effective_days).toBe(7);
     expect(typeof res.credits.balance).toBe("number");
-    expect(Object.keys(res.statistics.engineStats).every((k) => ["search", "crawl", "stealth"].includes(k))).toBe(true);
+    expect(Object.keys(res.statistics.engineStats).every((k) => ["search", "crawl"].includes(k))).toBe(true);
     const recent: UsageRecentRequest[] = res.recent_requests ?? [];
     expect(recent.length).toBeGreaterThan(0);
     expect(recent[0]).not.toHaveProperty("query");
-    expect(["search", "crawl", "stealth"]).toContain(recent[0].searchEngine);
+    expect(["search", "crawl"]).toContain(recent[0].searchEngine);
   });
 });
 
@@ -239,9 +237,7 @@ describe("errors", () => {
 
   it.each([
     ["error_402_extract", 402, false],
-    ["error_403_stealth_not_in_plan", 403, false],
-    ["error_410_stealth_ended", 410, false],
-    ["error_503_stealth_busy", 503, true],
+    ["error_410_gone", 410, false],
     ["error_504_extract", 504, true],
   ])("extract %s → %i", async (name, status, retryable) => {
     const e = await thrown(name as string, extract);

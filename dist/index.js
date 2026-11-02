@@ -1,14 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SerpexClient = exports.SerpApiException = exports.STEALTH_EXTRACT_TIMEOUT_MS = exports.EXTRACT_TIMEOUT_MS = exports.SEARCH_CONTENT_TIMEOUT_MS = exports.SEARCH_TIMEOUT_MS = exports.STEALTH_END_DATE = exports.VERSION = void 0;
+exports.SerpexClient = exports.SerpApiException = exports.EXTRACT_TIMEOUT_MS = exports.SEARCH_CONTENT_TIMEOUT_MS = exports.SEARCH_TIMEOUT_MS = exports.VERSION = void 0;
 const types_1 = require("./types");
 Object.defineProperty(exports, "SerpApiException", { enumerable: true, get: function () { return types_1.SerpApiException; } });
 /** SDK version, sent in the User-Agent header. Keep in step with package.json. */
-exports.VERSION = "2.12.0";
-/** Stealth mode ends at this instant; from then the API answers `stealth: true` with HTTP 410. */
-exports.STEALTH_END_DATE = "2026-11-01T00:00:00Z";
-// One stealth sunset warning per process, not one per call.
-let warnedStealthSunset = false;
+exports.VERSION = "2.13.0";
 /** Retry-After header (seconds) as milliseconds, when present and numeric. */
 function retryAfterHeaderMs(response) {
     const raw = response.headers?.get?.("retry-after");
@@ -20,12 +16,11 @@ function retryAfterHeaderMs(response) {
 // Client-side timeouts (ms). Each is longer than the server's own budget for
 // that request, so the client never gives up on a request the server still
 // finishes and bills: plain search 30 s upstream, search with include_content
-// 45 s, extract 55 s, stealth extract 80 s plus up to 15 s queue. Cloudflare
+// 45 s, extract 55 s. Cloudflare
 // closes origin responses at ~100 s. Same values as the Python SDK.
 exports.SEARCH_TIMEOUT_MS = 60000;
 exports.SEARCH_CONTENT_TIMEOUT_MS = 100000;
 exports.EXTRACT_TIMEOUT_MS = 100000;
-exports.STEALTH_EXTRACT_TIMEOUT_MS = 120000;
 /** Search params the API reads. Anything else is ignored server-side and not sent. */
 const SENT_SEARCH_PARAMS = new Set(["q", "include_content", "content_results"]);
 // One deprecation warning per process, not one per call.
@@ -38,7 +33,7 @@ class SerpexClient {
      * @param options - Optional. `timeoutMs` overrides the per-call timeout for
      *   every request. When omitted, each call uses a default sized above the
      *   server's own budget: 60 s search, 100 s search with include_content,
-     *   100 s extract, 120 s stealth extract.
+     *   100 s extract.
      */
     constructor(apiKey, baseUrl = "https://api.serpex.dev", options = {}) {
         if (!apiKey || typeof apiKey !== "string") {
@@ -180,8 +175,6 @@ class SerpexClient {
      *
      * Each URL succeeds or fails on its own: narrow `results[i]` on `success`.
      * Failed URLs carry `error` and `error_type` and are never charged.
-     * `stealth: true` is deprecated: stealth mode ends on 2026-11-01, after which
-     * the API answers it with HTTP 410.
      * @param params - Extraction parameters including the URLs to extract
      * @returns Extraction results
      */
@@ -211,19 +204,10 @@ class SerpexClient {
         const requestParams = {
             urls: params.urls,
         };
-        if (params.stealth !== undefined) {
-            requestParams.stealth = params.stealth;
-            if (params.stealth === true && !warnedStealthSunset) {
-                warnedStealthSunset = true;
-                console.warn("[serpex] Deprecated: stealth mode ends on 2026-11-01. From that date " +
-                    "extract({ stealth: true }) is rejected with HTTP 410 (not charged). " +
-                    "Send the request without stealth.");
-            }
-        }
         if (params.format !== undefined) {
             requestParams.format = params.format;
         }
-        return this.makeRequest("/api/crawl", requestParams, "POST", params.stealth ? exports.STEALTH_EXTRACT_TIMEOUT_MS : exports.EXTRACT_TIMEOUT_MS);
+        return this.makeRequest("/api/crawl", requestParams, "POST", exports.EXTRACT_TIMEOUT_MS);
     }
     /**
      * Fetch usage statistics and the credit balance for your whole organization
